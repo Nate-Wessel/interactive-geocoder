@@ -13,21 +13,26 @@
 		<div id="controls">
 
 			<h3>Addr:*</h3>
-
 			<form>
+				<input name="uid" type="hidden"/>
+			
 				<label for="region">Region</label><br>
-				<input id="region" value="text"/><br>
+				<input type="text" name="region" readonly /><br>
 
 				<label for="country">Country</label><br>
-				<input id="country" value="text"/><br>
+				<input type="text" name="country"/><br>
 
 				<label for="province">Province</label><br>
-				<input id="province" value="text"/><br>
+				<input type="text" name="province"/><br>
 				
 				<label for="city">City</label><br>
-				<input id="city" value="text"/><br>
+				<input type="text" name="city"/><br>
 				
-				<input type="submit" value="Geocode"/>
+				<button type="button" id="butt-geocode">Geocode</button>
+				<br>
+				<button type="button" id="butt-save-addr">Save Address</button>
+				<br>
+				<button type="button" id="butt-save-loc">Save Location</button>
 			</form>
 		</div>
 	</body>
