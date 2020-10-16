@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Interactive Point Geocoder</title>
+		<title>Interactive Geocoder</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="stylesheet" href="styles/main.css"/>
@@ -11,7 +11,24 @@
 	<body>
 		<div id="map"></div>
 		<div id="controls">
-			text and stuff
+
+			<h3>Addr:*</h3>
+
+			<form>
+				<label for="region">Region</label><br>
+				<input id="region" value="text"/><br>
+
+				<label for="country">Country</label><br>
+				<input id="country" value="text"/><br>
+
+				<label for="province">Province</label><br>
+				<input id="province" value="text"/><br>
+				
+				<label for="city">City</label><br>
+				<input id="city" value="text"/><br>
+				
+				<input type="submit" value="Geocode"/>
+			</form>
 		</div>
 	</body>
 </html>
