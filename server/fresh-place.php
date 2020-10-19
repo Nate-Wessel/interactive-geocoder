@@ -10,10 +10,12 @@ $connection = pg_connect($DBconnectionString);
 $query = "
 	SELECT
 		uid,
-		region, 
-		country, 
+		world_region, 
+		country,
+		subnational_region, 
 		province, 
-		city
+		city,
+		suburb
 	FROM places 
 	WHERE lat IS NULL
 	ORDER BY random() 

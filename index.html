@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Interactive Geocoder</title>
+		<title>Interactive Place Geocoder</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="stylesheet" href="styles/main.css"/>
@@ -13,19 +13,26 @@
 		<div id="controls">
 			<h3>Addr:*</h3>
 			<form>
-				<input name="uid" type="hidden"/>
+				<label for="uid">UID</label><br>
+				<input name="uid" readonly/><br>
 			
-				<label for="region">Region</label><br>
-				<input type="text" name="region" readonly /><br>
+				<label for="world_region">World Region</label><br>
+				<input type="text" name="world_region" readonly /><br>
 
 				<label for="country">Country</label><br>
 				<input type="text" name="country"/><br>
+				
+				<label for="subnational_region">Subnational Region</label><br>
+				<input type="text" name="subnational_region" readonly /><br>
 
-				<label for="province">Province</label><br>
+				<label for="province">Province / State / Territory</label><br>
 				<input type="text" name="province"/><br>
 				
 				<label for="city">City</label><br>
 				<input type="text" name="city"/><br>
+				
+				<label for="suburb">Suburb / Neighborhood / District</label><br>
+				<input type="text" name="suburb"/><br>
 				
 				<button type="button" id="butt-geocode">Geocode</button>
 				<br>

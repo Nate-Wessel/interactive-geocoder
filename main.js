@@ -16,10 +16,12 @@ var map
 window.onload = ()=>{
 	// identify form elements
 	form.uid = select('input[name="uid"]')
-	form.region = select('input[name="region"]')
+	form.world_region = select('input[name="world_region"]')
 	form.country = select('input[name="country"]')
+	form.subnational_region = select('input[name="subnational_region"]')
 	form.province = select('input[name="province"]')
 	form.city = select('input[name="city"]')
+	form.suburb = select('input[name="suburb"]')
 	
 	select('form button').on('click',geocode)
 	// make a map
@@ -31,10 +33,12 @@ window.onload = ()=>{
 	.then( response => {
 		console.log('Place is:',response)
 		form.uid.attr('value',response.uid)
-		form.region.attr('value',response.region)
+		form.world_region.attr('value',response.world_region)
 		form.country.attr('value',response.country)
+		form.subnational_region.attr('value',response.subnational_region)
 		form.province.attr('value',response.province)
 		form.city.attr('value',response.city)
+		form.suburb.attr('value',response.suburb)
 		// and pre-geocode it
 		geocode()
 	} )
