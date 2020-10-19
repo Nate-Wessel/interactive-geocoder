@@ -1,7 +1,8 @@
 import { 
 	map as leafletMap, 
 	tileLayer,
-	marker 
+	marker,
+	geoJSON
 } from 'leaflet/src/Leaflet'
 import { select } from 'd3-selection'
 import { json } from 'd3-fetch'
@@ -22,35 +23,68 @@ window.onload = ()=>{
 	form.province = select('input[name="province"]')
 	form.city = select('input[name="city"]')
 	form.suburb = select('input[name="suburb"]')
-	
-	select('form button').on('click',geocode)
+	// add button actions
+	select('form button#update-addr')
+		.on('click',updateAddress)
+	select('form button#save')
+		.on('click',save)
 	// make a map
 	map = leafletMap('map')
 	tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
 		.addTo(map);
 	// get a place up in the form
 	json(`${server}/fresh-place.php`)
-	.then( response => {
-		console.log('Place is:',response)
-		form.uid.attr('value',response.uid)
-		form.world_region.attr('value',response.world_region)
-		form.country.attr('value',response.country)
-		form.subnational_region.attr('value',response.subnational_region)
-		form.province.attr('value',response.province)
-		form.city.attr('value',response.city)
-		form.suburb.attr('value',response.suburb)
-		// and pre-geocode it
-		geocode()
-	} )
+		.then( response => {
+			setFormData(response)
+			geocode()
+		} )
+}
+
+function setFormData(newData){
+	form.uid.property('value',newData.uid)
+	form.world_region.property('value',newData.world_region)
+	form.country.property('value',newData.country)
+	form.subnational_region.property('value',newData.subnational_region)
+	form.province.property('value',newData.province)
+	form.city.property('value',newData.city)
+	form.suburb.property('value',newData.suburb)
+}
+
+function updateAddress(){
+	console.log('updateAddress')
+	geocode()
+}
+
+function currentFormData(){
+	return {
+		'uid': form.uid.property('value'),
+		'world_region': form.world_region.property('value'),
+		'country': form.country.property('value'),
+		'subnational_region': form.subnational_region.property('value'),
+		'province': form.province.property('value'),
+		'city': form.city.property('value'),
+		'suburb': form.suburb.property('value')
+	};
+}
+
+function save(){
+	let options = {
+		method:'POST',
+		body: JSON.stringify( currentFormData() ),
+		headers: { 'Content-Type': 'application/json' } 
+	}
+	json(`${server}/update.php`, options )
+		.then( r => console.log(r) )
 }
 
 function geocode(){
+	let data = currentFormData()
 	let params = new URLSearchParams( {
 		'key': 'pk.3acf24fbf7ce2d8e0239a9e882b4919b',
 	 	'format': 'json',
-		'country': form.country.attr('value'),
-		'state': form.province.attr('value'),
-		'city': form.city.attr('value'),
+		'country': data.country,
+		'state': data.province,
+		'city': data.city,
 		'polygon_geojson': 1,
 		'matchquality': 1,
 		'namedetails': 1
@@ -69,6 +103,12 @@ function geocode(){
 				marker(coords)
 					.addTo(map)
 					.bindPopup(popupHTML)
+					
+				if(r.geojson.type='Polygon'){
+					console.log('poly found')
+					geoJSON(r.geojson).addTo(map)
+				}
+					
 			} )
 			let allPoints = response.map( r => [r.lat,r.lon] )
 			map.fitBounds(allPoints,{maxZoom:14,padding:[30,30]})
