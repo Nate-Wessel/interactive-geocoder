@@ -23,6 +23,9 @@ window.onload = ()=>{
 	form.province = select('input[name="province"]')
 	form.city = select('input[name="city"]')
 	form.suburb = select('input[name="suburb"]')
+	form.lat = select('input[name="lat"]')
+	form.lon = select('input[name="lon"]')
+	
 	// add button actions
 	select('form button#update-addr')
 		.on('click',updateAddress)
@@ -63,7 +66,9 @@ function currentFormData(){
 		'subnational_region': form.subnational_region.property('value'),
 		'province': form.province.property('value'),
 		'city': form.city.property('value'),
-		'suburb': form.suburb.property('value')
+		'suburb': form.suburb.property('value'),
+		'lat': form.lat.property('value'),
+		'lon': form.lon.property('value')
 	};
 }
 
@@ -100,18 +105,17 @@ function geocode(){
 					<i>Quality:</i> ${r.matchquality.matchcode}, 
 					${r.matchquality.matchlevel}, 
 					${r.matchquality.matchtype}`
-				marker(coords)
+				geoJSON(r.geojson)
 					.addTo(map)
 					.bindPopup(popupHTML)
-					
-				if(r.geojson.type='Polygon'){
-					console.log('poly found')
-					geoJSON(r.geojson).addTo(map)
-				}
-					
 			} )
-			let allPoints = response.map( r => [r.lat,r.lon] )
-			map.fitBounds(allPoints,{maxZoom:14,padding:[30,30]})
+			// compute the aggregate bounding box and set view
+			let bottom = Math.min(...response.map( r => r.boundingbox[0] ))
+			let top = Math.max(...response.map( r => r.boundingbox[1] ))
+			let left = Math.min(...response.map( r => r.boundingbox[2] ))
+			let right = Math.max(...response.map( r => r.boundingbox[3] ))
+			let totalBounds = [[top,left],[bottom,right]]
+			map.fitBounds(totalBounds,{maxZoom:14,padding:[20,20]})
 		} )
 		.catch( err => console.warn(err) )
 }

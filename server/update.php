@@ -15,6 +15,8 @@ $country  = pg_escape_literal($_POST['country']);
 $province = pg_escape_literal($_POST['province']);
 $city     = pg_escape_literal($_POST['city']);
 $suburb   = pg_escape_literal($_POST['suburb']);
+$lat      = pg_escape_literal($_POST['lat']);
+$lon      = pg_escape_literal($_POST['lon']);
 
 $query = "
 	UPDATE places SET 
