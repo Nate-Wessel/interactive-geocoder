@@ -14639,6 +14639,7 @@ function save(){
 }
 
 function geocode(){
+	placesLayer.clearLayers();
 	let data = currentFormData();
 	let params = new URLSearchParams( {
 		'key': 'pk.3acf24fbf7ce2d8e0239a9e882b4919b',
