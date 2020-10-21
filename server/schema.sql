@@ -8,8 +8,8 @@ CREATE TABLE places (
 	city text,
 	suburb text, -- ie district, neighborhood, locality, etc
 	notes text,
-	lat numeric,
-	lon numeric,
+	lat numeric, -- numeric to store decimal precision
+	lon numeric, -- numeric to store decimal precision
 	point geometry(Point,4326),
 	polygon geometry(Polygon,4326),
 	edit_flag boolean DEFAULT TRUE -- use to flag records for processing

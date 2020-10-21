@@ -15,7 +15,8 @@ $query = "
 		subnational_region, 
 		province, 
 		city,
-		suburb
+		suburb,
+		lat, lon
 	FROM places 
 	WHERE lat IS NULL
 	ORDER BY random() 
