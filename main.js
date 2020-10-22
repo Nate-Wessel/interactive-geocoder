@@ -35,9 +35,10 @@ function addPopup(feature,layer){
 		<br>
 		${p.matchquality.matchtype},
 		${p.matchquality.matchlevel},
-		${p.matchquality.matchcode}<br>
-		<button>Use coords</button>
-	`
+		${p.matchquality.matchcode}<br>`
+		for( let [ key, value ] of Object.entries(p.address)){
+			popupHTML += `<b>${key}</b>: ${value}<br>`
+		}
 	layer.bindPopup(popupHTML)
 	layer.on('click',() => {
 		setFormData({'lat':p.lat,'lon':p.lon})
@@ -99,13 +100,16 @@ function geocodeLocationIQ(){
 		'extratags': 1
 	}
 	let data = currentFormData()
-	let queryParams = {
-		'country': data.country,
-		'state': data.province,
-		'city': data.city
+	let queryParams = {}
+	if(data.suburb != ''){
+		queryParams.q = `${data.suburb}, ${data.city}, ${data.province}, ${data.country}`
+	}else{
+		queryParams.country = data.country,
+		queryParams.state = data.province,
+		queryParams.city = data.city
 	}
 	// merge static and query parameters
-	let params = new URLSearchParams(Object.assign({},staticParams,queryParams))
+	let params = new URLSearchParams({...staticParams,...queryParams})
 	json(`${locationIQ}?${params.toString()}`)
 		.then( response => {
 			console.log(response)
@@ -120,12 +124,20 @@ function geocodeLocationIQ(){
 					'osd_id':r.osm_id,
 					'osm_type': r.osm_type,
 					'matchquality':r.matchquality,
-					'namedetails':r.namedetails
+					'namedetails':r.namedetails,
+					'address': r.address
 				}
 				return place
 			} )
 			placesLayer.addData(geojsonPlaces)
-			map.fitBounds(placesLayer.getBounds(),{maxZoom:14,padding:[20,20]})
+			map.fitBounds(
+				placesLayer.getBounds(),
+				{ 
+					maxZoom: 14, 
+					paddingTopLeft: [10,10],
+					paddingBottomRight: [100,10]
+				}
+			)
 		} )
 		.catch( err => console.warn(err) )
 }
