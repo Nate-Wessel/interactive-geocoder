@@ -14529,6 +14529,12 @@ function select(selector) {
       : new Selection([[selector]], root);
 }
 
+function selectAll(selector) {
+  return typeof selector === "string"
+      ? new Selection([document.querySelectorAll(selector)], [document.documentElement])
+      : new Selection([selector == null ? [] : array(selector)], root);
+}
+
 function responseJson(response) {
   if (!response.ok) throw new Error(response.status + " " + response.statusText);
   if (response.status === 204 || response.status === 205) return;
@@ -14542,31 +14548,17 @@ function json(input, init) {
 const server = 'http://localhost/interactive-geocoder/server';
 const locationIQ = 'https://us1.locationiq.com/v1/search.php';
 
-const form = {};
-
 var map, placesLayer;
 
 window.onload = ()=>{
-	// identify form elements
-	form.uid =                select('input[name="uid"]');
-	form.world_region =       select('input[name="world_region"]');
-	form.country =            select('input[name="country"]');
-	form.subnational_region = select('input[name="subnational_region"]');
-	form.province =           select('input[name="province"]');
-	form.city =               select('input[name="city"]');
-	form.suburb =             select('input[name="suburb"]');
-	form.lat =                select('input[name="lat"]');
-	form.lon =                select('input[name="lon"]');
 	// add button actions
-	select('form button#update-addr').on('click',updateAddress);
+	select('form button#update-addr').on('click',geocode);
 	select('form button#save').on('click',save);
 	select('form button#next-place').on('click',fetchNewPlace);
 	// make a map
 	map = createMap('map');
-	tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png')
-		.addTo(map);
+	tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 	placesLayer = geoJSON(undefined,{'onEachFeature':addPopup}).addTo(map);
-	
 	fetchNewPlace();
 };
 
@@ -14585,18 +14577,17 @@ function addPopup(feature,layer){
 		<button>Use coords</button>
 	`;
 	layer.bindPopup(popupHTML);
+	layer.on('click',() => {
+		setFormData({'lat':p.lat,'lon':p.lon});
+	} );
 }
 
 function setFormData(newData){
-	form.uid.property('value',newData.uid);
-	form.world_region.property('value',newData.world_region);
-	form.country.property('value',newData.country);
-	form.subnational_region.property('value',newData.subnational_region);
-	form.province.property('value',newData.province);
-	form.city.property('value',newData.city);
-	form.suburb.property('value',newData.suburb);
-	form.lat.property('value',newData.lat);
-	form.lon.property('value',newData.lon);
+	// iterate over object setting corresponding form elements
+	for( let [ key, value ] of Object.entries(newData)){
+		select(`input[name="${key}"]`)
+			.property('value', value ? value : '');
+	}
 }
 
 function fetchNewPlace(){
@@ -14610,22 +14601,14 @@ function fetchNewPlace(){
 		} );
 }
 
-function updateAddress(){
-	geocode();
-}
-
 function currentFormData(){
-	return {
-		'uid': form.uid.property('value'),
-		'world_region': form.world_region.property('value'),
-		'country': form.country.property('value'),
-		'subnational_region': form.subnational_region.property('value'),
-		'province': form.province.property('value'),
-		'city': form.city.property('value'),
-		'suburb': form.suburb.property('value'),
-		'lat': form.lat.property('value'),
-		'lon': form.lon.property('value')
-	};
+	let data = {};
+	selectAll('form input').each(function(d,i){
+		let key = select(this).property('name');
+		let val = select(this).property('value');
+		data[key] = val;
+	} );
+	return data
 }
 
 function save(){
@@ -14635,7 +14618,7 @@ function save(){
 		headers: { 'Content-Type': 'application/json' } 
 	};
 	json(`${server}/update.php`, options )
-		.then( r => console.log(r) );
+		.then( r => console.log('record stored:',r) );
 }
 
 function geocode(){

@@ -18,7 +18,7 @@ $query = "
 		suburb,
 		lat, lon
 	FROM places 
-	WHERE lat IS NULL
+	WHERE lat*lon IS NULL
 	ORDER BY random() 
 	LIMIT 1;";
 $result = pg_query($query);
