@@ -14548,6 +14548,9 @@ function json(input, init) {
 const server = 'http://localhost/interactive-geocoder/server';
 const locationIQ = 'https://us1.locationiq.com/v1/search.php';
 
+const mbToken = 'pk.eyJ1IjoiYXBmY2FuYWRhIiwiYSI6ImNrY3hpdzcwbz'+
+                'AwZzIydms3NGRtZzY2eXIifQ.E7PbT0YGmjJjLiLmyRWSuw';
+
 var map, placesLayer;
 
 window.onload = ()=>{
@@ -14557,7 +14560,11 @@ window.onload = ()=>{
 	select('form button#next-place').on('click',fetchNewPlace);
 	// make a map
 	map = createMap('map');
-	tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+	tileLayer(
+		'https://api.mapbox.com/styles/v1/apfcanada/'+
+		'ckgl4ahu31y5e19o0gt1z6ymb/tiles/256/{z}/{x}/{y}@2x?'+
+		'access_token='+mbToken
+	).addTo(map);
 	placesLayer = geoJSON(undefined,{'onEachFeature':addPopup}).addTo(map);
 	fetchNewPlace();
 };
@@ -14673,7 +14680,7 @@ function geocodeLocationIQ(){
 				{ 
 					maxZoom: 14, 
 					paddingTopLeft: [10,10],
-					paddingBottomRight: [100,10]
+					paddingBottomRight: [200,10]
 				}
 			);
 		} )
