@@ -14623,19 +14623,27 @@ function save(){
 
 function geocode(){
 	placesLayer.clearLayers();
-	let data = currentFormData();
-	let params = new URLSearchParams( {
+	geocodeLocationIQ();
+}
+
+function geocodeLocationIQ(){
+	let staticParams = {
 		'key': 'pk.3acf24fbf7ce2d8e0239a9e882b4919b',
-	 	'format': 'json',
-		'country': data.country,
-		'state': data.province,
-		'city': data.city,
+		'format': 'json',
 		'polygon_geojson': 1,
 		'matchquality': 1,
 		'namedetails': 1,
 		'addressdetails': 1,
 		'extratags': 1
-	} );
+	};
+	let data = currentFormData();
+	let queryParams = {
+		'country': data.country,
+		'state': data.province,
+		'city': data.city
+	};
+	// merge static and query parameters
+	let params = new URLSearchParams(Object.assign({},staticParams,queryParams));
 	json(`${locationIQ}?${params.toString()}`)
 		.then( response => {
 			console.log(response);
