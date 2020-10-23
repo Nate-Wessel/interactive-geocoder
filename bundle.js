@@ -14624,7 +14624,7 @@ function save(){
 		headers: { 'Content-Type': 'application/json' } 
 	};
 	json(`${server}/update.php`, options )
-		.then( r => console.log('record stored:',r) );
+		.then( response => console.log(response) );
 }
 
 function geocode(){

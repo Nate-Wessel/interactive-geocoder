@@ -23,15 +23,15 @@ $data = array_filter(
 	ARRAY_FILTER_USE_KEY
 );
 
-$success = pg_update( $connection, 'places', $data, array('uid'=>$uid) );
+$success = pg_update( $connection, 'places', $data, ['uid'=>$uid] );
 
-$query = "SELECT * FROM places WHERE uid = $uid;";
-$result = pg_query($connection,$query);
+$outcome = [
+	'success' => $success,
+	'updated' => $success ? $data : 'nadda'
+];
 
 // return the record as updated
-echo json_encode( pg_fetch_object($result) );
-
-//echo json_encode( $success );
+echo json_encode( $outcome );
 
 # close the connection
 pg_close($connection);
