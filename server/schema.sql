@@ -8,6 +8,7 @@ CREATE TABLE places (
 	city text,
 	suburb text, -- ie district, neighborhood, locality, etc
 	notes text,
+	osm_id bigint,
 	lat numeric, -- numeric to store decimal precision
 	lon numeric, -- numeric to store decimal precision
 	point geometry(Point,4326),

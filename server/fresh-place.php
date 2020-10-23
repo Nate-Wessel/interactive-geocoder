@@ -16,6 +16,8 @@ $query = "
 		metro_area,
 		city,
 		suburb,
+		notes,
+		osm_id,
 		lat, lon
 	FROM places 
 	WHERE lat*lon IS NULL

@@ -48,7 +48,7 @@ function addPopup(feature,layer){
 		}
 	layer.bindPopup(popupHTML)
 	layer.on('click',() => {
-		setFormData({'lat':p.lat,'lon':p.lon})
+		setFormData({'lat':p.lat,'lon':p.lon,'osm_id':p.osm_id})
 		spot.setLatLng([p.lat,p.lon]).addTo(map)
 	} )
 }
@@ -133,7 +133,8 @@ function geocodeLocationIQ(){
 					'osm_type': r.osm_type,
 					'matchquality':r.matchquality,
 					'namedetails':r.namedetails,
-					'address': r.address
+					'address': r.address,
+					'osm_id' : r.osm_id
 				}
 				return place
 			} )
