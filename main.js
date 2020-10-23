@@ -51,7 +51,7 @@ function addPopup(feature,layer){
 }
 
 function setFormData(newData){
-	// iterate over object setting corresponding form elements
+	// iterate over data object setting corresponding form elements
 	for( let [ key, value ] of Object.entries(newData)){
 		select(`input[name="${key}"]`)
 			.property('value', value ? value : '')
@@ -111,9 +111,7 @@ function geocodeLocationIQ(){
 		data.province, 
 		data.country
 	]
-	let queryParams = {
-		q: addressFields.filter(val=>val!='').join(', ')
-	}
+	let queryParams = { q: addressFields.filter(val=>val!='').join(', ') }
 	// merge static and query parameters
 	let params = new URLSearchParams({...staticParams,...queryParams})
 	json(`${locationIQ}?${params.toString()}`)
@@ -145,6 +143,6 @@ function geocodeLocationIQ(){
 				}
 			)
 		} )
-		.catch( err => console.warn(err) )
+		.catch( err => console.warn('No matches for',queryParams) )
 }
 
