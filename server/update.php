@@ -1,37 +1,37 @@
 <?php
-#quickly return json containing randomly selected OD points from server-side DB
-
-require 'config.php';
-
-$_POST = json_decode(file_get_contents('php://input'), true);
+# store updates to a place record, report success
 
 # connect to DB
+require 'config.php';
 $connection = pg_connect($DBconnectionString);
 
-# get the POST variables. We know what to expect, so 
-# there is little checking needed
-$uid      =	pg_escape_literal($_POST['uid']);
-$country  = pg_escape_literal($_POST['country']);
-$province = pg_escape_literal($_POST['province']);
-$city     = pg_escape_literal($_POST['city']);
-$suburb   = pg_escape_literal($_POST['suburb']);
-$lat      = pg_escape_literal($_POST['lat']);
-$lon      = pg_escape_literal($_POST['lon']);
+# get the posted JSON data
+$postedVars = json_decode(file_get_contents('php://input'), true);
 
-$query = "
-	UPDATE places SET 
-		country = $country,
-		province = $province,
-		city = $city,
-		suburb = $suburb,
-		lat = $lat,
-		lon = $lon
-	WHERE uid = $uid;
-	SELECT * FROM places WHERE uid = $uid;";
+$uid = $postedVars['uid'];
+
+// set empty strings to null
+$cleanedVars = array_map(  
+	function($val){ return $val == '' ? NULL : $val; },
+	$postedVars
+);
+
+$allowedKeys = ['country','province','city','suburb','lat','lon'];
+$data = array_filter(
+	$cleanedVars,
+	function($key) use ($allowedKeys){ return in_array($key, $allowedKeys); },
+	ARRAY_FILTER_USE_KEY
+);
+
+$success = pg_update( $connection, 'places', $data, array('uid'=>$uid) );
+
+$query = "SELECT * FROM places WHERE uid = $uid;";
 $result = pg_query($connection,$query);
 
 // return the record as updated
 echo json_encode( pg_fetch_object($result) );
+
+//echo json_encode( $success );
 
 # close the connection
 pg_close($connection);
