@@ -10,7 +10,6 @@ $connection = pg_connect($DBconnectionString);
 $query = "
 	SELECT
 		uid,
-		world_region, 
 		country,
 		subnational_region, 
 		province, 
@@ -20,7 +19,7 @@ $query = "
 		lat, lon
 	FROM places 
 	WHERE lat*lon IS NULL
-	ORDER BY uid 
+	ORDER BY random()
 	LIMIT 1;";
 $result = pg_query($query);
 $record = pg_fetch_object($result);

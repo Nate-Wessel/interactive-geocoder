@@ -7721,6 +7721,13 @@ var CircleMarker = Path.extend({
 	}
 });
 
+
+// @factory L.circleMarker(latlng: LatLng, options?: CircleMarker options)
+// Instantiates a circle marker object given a geographical point, and an optional options object.
+function circleMarker(latlng, options) {
+	return new CircleMarker(latlng, options);
+}
+
 /*
  * @class Circle
  * @aka L.Circle
@@ -14554,6 +14561,7 @@ const mbToken = 'pk.eyJ1IjoiYXBmY2FuYWRhIiwiYSI6ImNrY3hpdzcwbz'+
                 'AwZzIydms3NGRtZzY2eXIifQ.E7PbT0YGmjJjLiLmyRWSuw';
 
 var map, placesLayer;
+var spot = circleMarker();
 
 window.onload = ()=>{
 	// add button actions
@@ -14585,6 +14593,7 @@ function addPopup(feature,layer){
 	layer.bindPopup(popupHTML);
 	layer.on('click',() => {
 		setFormData({'lat':p.lat,'lon':p.lon});
+		spot.setLatLng([p.lat,p.lon]).addTo(map);
 	} );
 }
 
@@ -14599,6 +14608,7 @@ function setFormData(newData){
 function fetchNewPlace(){
 	// tidy up from before
 	placesLayer.clearLayers();
+	spot.remove();
 	// fetch data from server
 	json(`${server}/fresh-place.php`)
 		.then( response => {
