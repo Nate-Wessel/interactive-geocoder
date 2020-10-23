@@ -14,12 +14,13 @@ $query = "
 		country,
 		subnational_region, 
 		province, 
+		metro_area,
 		city,
 		suburb,
 		lat, lon
 	FROM places 
 	WHERE lat*lon IS NULL
-	ORDER BY random() 
+	ORDER BY uid 
 	LIMIT 1;";
 $result = pg_query($query);
 $record = pg_fetch_object($result);

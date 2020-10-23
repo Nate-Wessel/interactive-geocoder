@@ -16,7 +16,7 @@ $cleanedVars = array_map(
 	$postedVars
 );
 
-$allowedKeys = ['country','province','city','suburb','lat','lon'];
+$allowedKeys = ['country','province','metro_area','city','suburb','lat','lon'];
 $data = array_filter(
 	$cleanedVars,
 	function($key) use ($allowedKeys){ return in_array($key, $allowedKeys); },
