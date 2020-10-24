@@ -12,26 +12,32 @@
 		<div id="map"></div>
 		<div id="controls">
 			<form>
-				<label for="uid">UID</label><br>
-				<input name="uid" readonly/><br>
+				<label for="geo_id">Geo-ID</label><br>
+				<input name="geo_id" readonly/><br>
 
 				<label for="country">Country</label><br>
 				<input type="text" name="country"/><br>
 				
 				<label for="subnational_region">Subnational Region</label><br>
-				<input type="text" name="subnational_region" readonly/><br>
+				<input type="text" name="subnational_region"/><br>
 
 				<label for="province">Province / State / Territory</label><br>
 				<input type="text" name="province"/><br>
 				
-				<label for="metro_area">Metro Area</label><br>
-				<input type="text" name="metro_area"/><br>
+				<label for="metro">Metro Area</label><br>
+				<input type="text" name="metro"/><br>
+				
+				<label for="county">County</label><br>
+				<input type="text" name="county"/><br>
 				
 				<label for="city">City</label><br>
 				<input type="text" name="city"/><br>
 				
-				<label for="suburb">Suburb / Neighborhood / District</label><br>
-				<input type="text" name="suburb"/><br>
+				<label for="district">Suburb / Neighborhood / District</label><br>
+				<input type="text" name="district"/><br>
+				
+				<label for="osm_id">OSM ID</label><br>
+				<input type="text" name="osm_id" readonly/><br>
 				
 				<label for="lat">Latitude</label><br>
 				<input type="text" name="lat" readonly/><br>
@@ -39,14 +45,11 @@
 				<label for="lon">Longitude</label><br>
 				<input type="text" name="lon" readonly/><br>
 				
-				<label for="osm_id">OSM ID</label><br>
-				<input type="text" name="osm_id" readonly/><br>
-				
 				<button type="button" id="next-place">Next Place</button>
 				<br>
 				<button type="button" id="update-addr">Retry Address</button>
 				<br>
-				<button type="button" id="save">Save Location & Address</button>
+				<button type="button" id="save">Save</button>
 			</form>
 		</div>
 	</body>

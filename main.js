@@ -110,9 +110,12 @@ function geocodeLocationIQ(){
 	}
 	let data = currentFormData()
 	let addressFields = [ 
-		data.suburb, 
+		data.district, 
 		data.city, 
-		data.province, 
+		data.county,
+		data.metro,
+		data.province,
+		data.subnational_region, 
 		data.country
 	]
 	let queryParams = { q: addressFields.filter(val=>val!='').join(', ') }

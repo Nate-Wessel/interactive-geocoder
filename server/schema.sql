@@ -1,17 +1,19 @@
-CREATE TABLE places (
-	uid serial,
-	world_region text,
+CREATE TABLE places2 (
+	geo_id serial PRIMARY KEY,
 	country text,
 	subnational_region text,
 	province text,
-	metro_area text,
+	metro text,
+	county text,
 	city text,
-	suburb text, -- ie district, neighborhood, locality, etc
-	notes text,
-	osm_id bigint,
-	lat numeric, -- numeric to store decimal precision
-	lon numeric, -- numeric to store decimal precision
+	district text,
+	unique(
+		country, subnational_region,
+		province, metro, county, 
+		city, district
+	),
+	osm_id bigint UNIQUE,
 	point geometry(Point,4326),
-	polygon geometry(Polygon,4326),
-	edit_flag boolean DEFAULT TRUE -- use to flag records for processing
+	polygon geometry(MultiPolygon,4326),
+	notes text
 );

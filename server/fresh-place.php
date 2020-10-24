@@ -9,18 +9,19 @@ $connection = pg_connect($DBconnectionString);
 # select a random record
 $query = "
 	SELECT
-		uid,
+		geo_id,
 		country,
 		subnational_region, 
 		province, 
-		metro_area,
+		metro,
+		county,
 		city,
-		suburb,
-		notes,
+		district,
 		osm_id,
-		lat, lon
+		notes,
+		ST_X(point) AS lon,
+		ST_Y(point) AS lat
 	FROM places 
-	WHERE lat*lon IS NULL
 	ORDER BY random()
 	LIMIT 1;";
 $result = pg_query($query);
