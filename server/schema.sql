@@ -17,3 +17,17 @@ CREATE TABLE places2 (
 	polygon geometry(MultiPolygon,4326),
 	notes text
 );
+
+CREATE OR REPLACE VIEW places_addr AS 
+SELECT 
+	geo_id,
+	concat_ws(', ',
+		district, 
+		city, 
+		county, 
+		metro, 
+		province, 
+		subnational_region, 
+		country
+	) AS addr
+FROM places;
