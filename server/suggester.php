@@ -11,7 +11,7 @@ $query = "
 	SELECT geo_id, addr
 	FROM places_addr
 	ORDER BY similarity({$addr},addr) DESC
-	LIMIT 5;";
+	LIMIT 8;";
 $result = pg_query($query);
 $records = pg_fetch_all($result);
 

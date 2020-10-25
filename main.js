@@ -19,8 +19,11 @@ const mbToken = 'pk.eyJ1IjoiYXBmY2FuYWRhIiwiYSI6ImNrY3hpdzcwbz'+
 var map, placesLayer
 var spot = circleMarker()
 
-window.onload = ()=>{
-	// add button actions
+window.onload = ()=>{ 
+	// add actions
+	select('input[name="search"]')
+		.on('input',findSimilar)
+		.on('unfocus',)
 	select('#controls button#update').on('click',geocode)
 	select('#controls button#save').on('click',save)
 	select('#controls button#next').on('click',fetchNewPlace)
@@ -28,6 +31,34 @@ window.onload = ()=>{
 	map = leafletMap('map').setView([43.67,-79.38],13)
 	tileLayer(`${mbMap}?access_token=${mbToken}`).addTo(map)
 	placesLayer = geoJSON(undefined,{'onEachFeature':addPopup}).addTo(map)
+}
+
+function undisplaySearchResults(){
+	selectAll('ol#search-results li').remove()
+}
+
+function findSimilar(event){
+	let term = event.target.value
+	if( term.length > 2 ){
+		json(`${server}/suggester.php?addr=${term}`).then( response => {
+			console.log(term, response)
+			select('ol#search-results')
+				.selectAll('li')
+				.data(response,d=>d.geo_id)
+				.join('li')
+				.text(d=>d.addr)
+				.on('click',event => {
+					displayRecord(select(event.target).datum().geo_id) 
+					undisplaySearchResults()
+				} )
+		} )
+	}else{ // search key is too short
+		undisplaySearchResults()
+	} 
+}
+
+function displayRecord(geo_id){
+	console.log(`should display record ${geo_id}`)
 }
 
 function addPopup(feature,layer){
