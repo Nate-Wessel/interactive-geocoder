@@ -21,14 +21,13 @@ var spot = circleMarker()
 
 window.onload = ()=>{
 	// add button actions
-	select('form button#update-addr').on('click',geocode)
-	select('form button#save').on('click',save)
-	select('form button#next-place').on('click',fetchNewPlace)
+	select('#controls button#update').on('click',geocode)
+	select('#controls button#save').on('click',save)
+	select('#controls button#next').on('click',fetchNewPlace)
 	// make a map
-	map = leafletMap('map')
+	map = leafletMap('map').setView([43.67,-79.38],13)
 	tileLayer(`${mbMap}?access_token=${mbToken}`).addTo(map)
 	placesLayer = geoJSON(undefined,{'onEachFeature':addPopup}).addTo(map)
-	fetchNewPlace()
 }
 
 function addPopup(feature,layer){

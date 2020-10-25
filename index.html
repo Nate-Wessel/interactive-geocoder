@@ -11,6 +11,11 @@
 	<body>
 		<div id="map"></div>
 		<div id="controls">
+			<div class="panel">
+				<button type="button" id="next">New</button>
+				<button type="button" id="update">Rematch</button>
+				<button type="button" id="save">Save</button>
+			</div>
 			<form>
 				<label for="geo_id">Geo-ID</label><br>
 				<input name="geo_id" readonly/><br>
@@ -44,12 +49,7 @@
 				
 				<label for="lon">Longitude</label><br>
 				<input type="text" name="lon" readonly/><br>
-				
-				<button type="button" id="next-place">Next Place</button>
-				<br>
-				<button type="button" id="update-addr">Retry Address</button>
-				<br>
-				<button type="button" id="save">Save</button>
+
 			</form>
 		</div>
 	</body>

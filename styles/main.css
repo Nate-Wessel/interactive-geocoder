@@ -1,15 +1,29 @@
-html, body, #map {
+html, body {
 	width: 100%;
 	height: 100%; 
 	margin: 0;
 	padding: 0; }
 	
 #controls {
-	display: block;
-	padding: 20px;  
+	position: absolute;
+	height: 100%;
+	width: 220px;
+	right: 0;
+	padding: 15px;  
 	background: #eee;
 	border: 1px solid grey;
-	position: fixed;
-	top: 0;
-	right: 0;
 	z-index: 999; }
+#map {
+	position: absolute;
+	height: 100%;
+	width: calc(100% - 220px); }
+	
+#controls .panel {
+	display: flex;
+	flex-wrap: wrap;
+	margin-bottom: 10px; }
+
+button {
+	margin: 5px; }
+input {
+	margin-bottom: 5px; }
