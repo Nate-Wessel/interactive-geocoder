@@ -26,7 +26,7 @@ window.onload = ()=>{
 		.on('unfocus',)
 	select('#controls button#update').on('click',geocode)
 	select('#controls button#save').on('click',save)
-	select('#controls button#next').on('click',fetchNewPlace)
+	select('#controls button#next').on('click',()=>fetchPlace())
 	// make a map
 	map = leafletMap('map').setView([43.67,-79.38],13)
 	tileLayer(`${mbMap}?access_token=${mbToken}`).addTo(map)
@@ -48,17 +48,13 @@ function findSimilar(event){
 				.join('li')
 				.text(d=>d.addr)
 				.on('click',event => {
-					displayRecord(select(event.target).datum().geo_id) 
+					fetchPlace(select(event.target).datum().geo_id) 
 					undisplaySearchResults()
 				} )
 		} )
 	}else{ // search key is too short
 		undisplaySearchResults()
 	} 
-}
-
-function displayRecord(geo_id){
-	console.log(`should display record ${geo_id}`)
 }
 
 function addPopup(feature,layer){
@@ -91,16 +87,19 @@ function setFormData(newData){
 	}
 }
 
-function fetchNewPlace(){
+function fetchPlace(geo_id){
+	let URL = `${server}/get-place.php`
+	if(!isNaN(geo_id)){ 
+		URL += `?geo_id=${geo_id}`
+	}
 	// tidy up from before
 	placesLayer.clearLayers()
 	spot.remove()
 	// fetch data from server
-	json(`${server}/fresh-place.php`)
-		.then( response => {
-			setFormData(response)
-			geocode()
-		} )
+	json(URL) .then( response => {
+		setFormData(response)
+		geocode()
+	} )
 }
 
 function currentFormData(){
