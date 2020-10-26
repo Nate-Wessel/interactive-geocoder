@@ -16239,6 +16239,7 @@ var map, placesLayer;
 var spot = circleMarker();
 
 window.onload = ()=>{ 
+	emptyFormFields();
 	// add actions
 	select('input[name="search"]')
 		.on('input',findSimilar)
@@ -16298,6 +16299,10 @@ function addPopup(feature,layer){
 	} );
 }
 
+function emptyFormFields(){
+	selectAll('form input').property('value','');
+}
+
 function setFormData(newData){
 	// iterate over data object setting corresponding form elements
 	for( let [ key, value ] of Object.entries(newData)){
@@ -16345,7 +16350,7 @@ function save(){
 				select(`input[name="${key}"]`)
 					.style('background-color',val?'green':'red')
 					.transition().duration(2000)
-					.style('background-color','white');
+					.style('background-color',null);
 			}
 		} );
 }

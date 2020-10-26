@@ -33,6 +33,8 @@ input {
 	border: 1px solid grey;
 	border-radius: 4px;
 	padding: 2px; }
+input:read-only {
+	background: yellow; }
 	
 #search-results {
 	position: absolute;
