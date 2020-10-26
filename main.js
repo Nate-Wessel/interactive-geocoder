@@ -6,6 +6,7 @@ import {
 	circleMarker
 } from 'leaflet/src/Leaflet'
 import { select, selectAll } from 'd3-selection'
+import { transition } from 'd3-transition'
 import { json } from 'd3-fetch'
 
 const server = 'http://localhost/interactive-geocoder/server'
@@ -119,7 +120,16 @@ function save(){
 		headers: { 'Content-Type': 'application/json' } 
 	}
 	json(`${server}/update.php`, options )
-		.then( response => console.log(response) )
+		.then( response => {
+			console.log(response) 
+			// give feedback on updated form fields
+			for( [key,val] of Object.entries(response.updated)){
+				select(`input[name="${key}"]`)
+					.style('background-color',val?'green':'red')
+					.transition().duration(2000)
+					.style('background-color','white')
+			}
+		} )
 }
 
 function geocode(){

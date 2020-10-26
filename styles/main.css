@@ -28,7 +28,11 @@ button, input {
 	width: 100%;
 	margin-bottom: 7px; }
 input {
-	width: calc(100% - 10px); }
+	width: calc(100% - var(--panel-padding));
+	background: white;
+	border: 1px solid grey;
+	border-radius: 4px;
+	padding: 2px; }
 	
 #search-results {
 	position: absolute;
