@@ -16242,7 +16242,7 @@ window.onload = ()=>{
 	emptyFormFields();
 	// add actions
 	select('input[name="search"]')
-		.on('input',findSimilar)
+		.on('input',search)
 		.on('unfocus',);
 	select('#controls button#update').on('click',geocode);
 	select('#controls button#save').on('click',save);
@@ -16253,15 +16253,18 @@ window.onload = ()=>{
 	placesLayer = geoJSON(undefined,{'onEachFeature':addPopup}).addTo(map);
 };
 
-function undisplaySearchResults(){
-	selectAll('ol#search-results li').remove();
-}
-
-function findSimilar(event){
-	let term = event.target.value;
-	if( term.length > 2 ){
-		json(`${server}/suggester.php?addr=${term}`).then( response => {
-			console.log(term, response);
+function search(event){
+	// handles input/changes to the search parameters
+	var resource = null;
+	let searchTerm = event.target.value;
+	// is this a search by name or geo_id?
+	if(!isNaN(searchTerm) & Number(searchTerm) > 0){
+		resource = `${server}/suggester.php?geo_id=${Number(searchTerm)}`;
+	}else if(searchTerm.trim().length > 2){
+		resource = `${server}/suggester.php?addr=${searchTerm}`;
+	}
+	if(resource){
+		json(resource).then( response => {
 			select('ol#search-results')
 				.selectAll('li')
 				.data(response,d=>d.geo_id)
@@ -16270,11 +16273,15 @@ function findSimilar(event){
 				.on('click',event => {
 					fetchPlace(select(event.target).datum().geo_id); 
 					undisplaySearchResults();
-				} );
+				} );	
 		} );
-	}else { // search key is too short
+	}else {
 		undisplaySearchResults();
-	} 
+	}
+}
+
+function undisplaySearchResults(){
+	selectAll('ol#search-results li').remove();
 }
 
 function addPopup(feature,layer){
