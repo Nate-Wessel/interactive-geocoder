@@ -7,17 +7,12 @@ $connection = pg_connect($DBconnectionString);
 
 if(array_key_exists('geo_id',$_GET)){
 	$geo_id = pg_escape_literal($_GET['geo_id']);
-	$result = pg_query("SELECT * FROM places WHERE geo_id = $geo_id;");
+	$query = "SELECT * FROM places_form WHERE geo_id = $geo_id;";
 }else{
 	# select a random record
-	$query = "
-		SELECT *
-		FROM places 
-		ORDER BY random()
-		LIMIT 1;";
-	$result = pg_query($query);
+	$query = "SELECT * FROM places_form ORDER BY random() LIMIT 1;";
 }
-
+$result = pg_query($query);
 $record = pg_fetch_object($result);
 
 if(!$record){ // if no results returned

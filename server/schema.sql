@@ -31,3 +31,19 @@ SELECT
 		country
 	) AS addr
 FROM places;
+
+CREATE OR REPLACE VIEW places_form AS 
+SELECT 
+	geo_id,
+	country,
+	subnational_region,
+	province, 
+	metro,
+	county, 
+	city,
+	district, 
+	osm_id,
+	notes,
+	ST_AsGeoJSON(point) AS point_geojson,
+	ST_AsGeoJSON(polygon) AS polygon_geojson
+FROM places;

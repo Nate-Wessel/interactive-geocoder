@@ -16294,7 +16294,10 @@ function addPopup(feature,layer){
 		}
 	layer.bindPopup(popupHTML);
 	layer.on('click',() => {
-		setFormData({'lat':p.lat,'lon':p.lon,'osm_id':p.osm_id});
+		setFormData( {
+			'point_geojson': `{"type":"Point","coordinates":[${p.lon},${p.lat}]}`,
+			'osm_id':p.osm_id
+		} );
 		spot.setLatLng([p.lat,p.lon]).addTo(map);
 	} );
 }
