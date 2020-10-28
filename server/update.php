@@ -12,7 +12,7 @@ $geo_id = $postedData['geo_id'];
 unset($postedData['geo_id']);
 
 $currentData = pg_fetch_array(
-	pg_query("SELECT * FROM places_form WHERE geo_id = $geo_id;")
+	pg_query("SELECT * FROM places WHERE geo_id = $geo_id;")
 );
 
 // find values that have changed, only updating those
@@ -24,7 +24,12 @@ foreach($currentData as $key => $currentValue){
 		// set empty strings to null
 		$newval = $postedData[$key] == '' ? NULL : $postedData[$key];
 		if( $newval != $currentValue ){
-			
+			$escaped_newval = pg_escape_literal($newval);
+			$result = pg_query("
+				UPDATE places SET $key = $escaped_newval 
+				WHERE geo_id = $geo_id;
+			");
+			if(!$result){ $success = false; }
 			$updates[$key] = [ $currentValue, $newval ];
 		}
 	}
@@ -33,11 +38,12 @@ foreach($currentData as $key => $currentValue){
 if(array_key_exists('point_geojson',$postedData)){
 	if($postedData['point_geojson'] != ''){
 		$point_geojson = pg_escape_literal($postedData['point_geojson']);
-		pg_query("
+		$result = pg_query("
 			UPDATE places SET 
 				point = ST_GeomFromGeoJSON($point_geojson)
 			WHERE geo_id = $geo_id;
 		");
+		if(!$result){ $success = false; }
 	}
 }
 

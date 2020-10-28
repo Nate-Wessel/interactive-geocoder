@@ -13,6 +13,7 @@ CREATE TABLE places2 (
 		city, district
 	),
 	osm_id bigint UNIQUE,
+	osm_id_type text, -- one of 'point','boundary'
 	point geometry(Point,4326),
 	polygon geometry(MultiPolygon,4326),
 	notes text
@@ -43,6 +44,7 @@ SELECT
 	city,
 	district, 
 	osm_id,
+	osm_id_type,
 	notes,
 	ST_AsGeoJSON(point) AS point_geojson,
 	ST_AsGeoJSON(polygon) AS polygon_geojson

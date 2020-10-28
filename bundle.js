@@ -16300,7 +16300,8 @@ function addPopup(feature,layer){
 			popupHTML += `<b>${key}</b>: ${value}<br>`;
 		}
 	layer.bindPopup(popupHTML);
-	layer.on('click',() => {
+	layer.on('click',(event) => {
+		console.log(event);
 		setFormData( {
 			'point_geojson': `{"type":"Point","coordinates":[${p.lon},${p.lat}]}`,
 			'osm_id':p.osm_id
@@ -16308,6 +16309,7 @@ function addPopup(feature,layer){
 		spot.setLatLng([p.lat,p.lon]).addTo(map);
 	} );
 }
+
 
 function emptyFormFields(){
 	selectAll('form input').property('value','');
@@ -16340,7 +16342,7 @@ function currentFormData(){
 	let data = {};
 	selectAll('form input').each(function(d,i){
 		let key = select(this).property('name');
-		let val = select(this).property('value');
+		let val = select(this).property('value').trim();
 		data[key] = val;
 	} );
 	return data
