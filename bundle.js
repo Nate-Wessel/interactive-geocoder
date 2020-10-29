@@ -16363,21 +16363,34 @@ function save(){
 		} );
 }
 
+const nominatimData = {};
+
 function geocode(){
 	// geocode with Nominatim
 	let params = new URLSearchParams( {
 		'q': currentAddressString(), 'format': 'json', 'polygon_geojson': 1,
 		'matchquality': 1, 'namedetails': 1, 'addressdetails': 1, 'extratags': 1
 	} );
-	json(`https://nominatim.openstreetmap.org/search?${params.toString()}`)
-		.then( response => {
-			select('ol#results')
-				.selectAll('li')
-				.data(response,d=>d.display_name)
-				.join('li').text(d=>d.display_name)
-				.classed('nominatim-search',true)
-				.on('click',showGeoResult);
-		} );
+	let URL = `https://nominatim.openstreetmap.org/search?${params.toString()}`;
+	
+	console.log(nominatimData);
+	
+	if( URL in nominatimData ){ // this exact request has already been made
+		return showResults(nominatimData[URL])
+	}
+	// or else this is a new request in this session
+	json(URL).then( response => {
+		showResults(response);
+		nominatimData[URL] = response;
+	} );
+	function showResults(response){
+		select('ol#results')
+			.selectAll('li')
+			.data(response,d=>d.display_name)
+			.join('li').text(d=>d.display_name)
+			.classed('nominatim-search',true)
+			.on('click',showGeoResult);
+	} 
 }
 
 function showGeoResult(event){
