@@ -1,5 +1,5 @@
 :root {
-	--panel-width: 250px;
+	--panel-width: 270px;
 	--panel-padding: 10px;
 	--panel-bg: #eee; }
 
@@ -36,8 +36,7 @@ input {
 input:read-only {
 	background: yellow; }
 	
-#search-results, 
-#geocoding-results {
+#results {
 	position: absolute;
 	top: 0;
 	margin: 0;
@@ -47,14 +46,11 @@ input:read-only {
 	width: var(--panel-width);
 	border-radius: 5px; 
 	list-style: none; }
-#search-results li,
-#geocoding-results li {
+#results li {
 	padding: 10px;
 	border-top: 1px solid grey; }
-#search-results li:hover,
-#geocoding-results li:hover {
-	background: #fbb; }
+#results li.own-search { background: rgba(0,0,255,0.2); }
+#results li.own-search:hover { background: rgba(0,0,255,0.4); }
+#results li.nominatim-search { background: rgba(255,0,0,0.2); }
+#results li.nominatim-search:hover { background: rgba(255,0,0,0.4); }
 	
-#geocoding-results {
-	top: auto;
-	bottom: 0; }

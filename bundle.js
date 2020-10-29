@@ -16237,7 +16237,6 @@ const mbToken = 'pk.eyJ1IjoiYXBmY2FuYWRhIiwiYSI6ImNrY3hpdzcwbz'+
 const defaultCenter = [43.67,-79.38]; // toronto
 const defaultMaxZoom = 13;
 
-
 var map;
 const responseLayer = geoJSON( undefined, {
 	'style': { color: 'red' },
@@ -16252,19 +16251,19 @@ const selectionLayer = geoJSON( undefined, {
 	}
 } );
 
-
-
 window.onload = ()=>{ 
 	emptyFormFields();
 	// add actions
 	select('input[name="search"]')
-		.on('input',search)
-		.on('unfocus',);
+		.on('input focus',search)
+		.on('unfocus',hideResults);
 	select('#controls button#update').on('click',geocode);
 	select('#controls button#save').on('click',save);
 	select('#controls button#next').on('click',()=>fetchPlace());
 	// make a map and add all layers
-	map = createMap('map').setView(defaultCenter,defaultMaxZoom);
+	map = createMap('map')
+		.setView(defaultCenter,defaultMaxZoom)
+		.on('click drag',hideResults);
 	selectionLayer.addTo(map);
 	responseLayer.addTo(map);
 	tileLayer(`${mbMap}?access_token=${mbToken}`).addTo(map);
@@ -16282,23 +16281,23 @@ function search(event){
 	}
 	if(resource){
 		json(resource).then( response => {
-			select('ol#search-results')
+			select('ol#results')
 				.selectAll('li')
 				.data(response,d=>d.geo_id)
-				.join('li')
+				.join('li').classed('own-search',true)
 				.text(d=>d.addr)
 				.on('click',event => {
 					fetchPlace( select(event.target).datum().geo_id); 
-					undisplaySearchResults();
+					hideResults();
 				} );	
 		} );
 	}else {
-		undisplaySearchResults();
+		hideResults();
 	}
 }
 
-function undisplaySearchResults(){
-	selectAll('ol#search-results li').remove();
+function hideResults(){
+	selectAll('ol#results li').remove();
 }
 
 
@@ -16372,10 +16371,11 @@ function geocode(){
 	} );
 	json(`https://nominatim.openstreetmap.org/search?${params.toString()}`)
 		.then( response => {
-			select('#geocoding-results')
+			select('ol#results')
 				.selectAll('li')
-				.data(response)
+				.data(response,d=>d.display_name)
 				.join('li').text(d=>d.display_name)
+				.classed('nominatim-search',true)
 				.on('click',showGeoResult);
 		} );
 }
