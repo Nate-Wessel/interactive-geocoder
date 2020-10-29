@@ -16228,15 +16228,31 @@ function json(input, init) {
 }
 
 const server = 'http://localhost/interactive-geocoder/server';
-const locationIQ = 'https://us1.locationiq.com/v1/search.php';
 
 const mbMap =   'https://api.mapbox.com/styles/v1/apfcanada/'+
                 'ckgl4ahu31y5e19o0gt1z6ymb/tiles/256/{z}/{x}/{y}';
 const mbToken = 'pk.eyJ1IjoiYXBmY2FuYWRhIiwiYSI6ImNrY3hpdzcwbz'+
                 'AwZzIydms3NGRtZzY2eXIifQ.E7PbT0YGmjJjLiLmyRWSuw';
 
-var map, placesLayer;
-var spot = circleMarker();
+const defaultCenter = [43.67,-79.38]; // toronto
+const defaultMaxZoom = 13;
+
+
+var map;
+const responseLayer = geoJSON( undefined, {
+	'style': { color: 'red' },
+	'pointToLayer': ( feature, latlng ) => {
+		return circleMarker( latlng, { radius: 5, color: 'red' } )
+	}
+} );
+const selectionLayer = geoJSON( undefined, {
+	'style': { color: 'blue' },
+	'pointToLayer': ( feature, latlng ) => {
+		return circleMarker( latlng, { radius: 10, color: 'blue' } )
+	}
+} );
+
+
 
 window.onload = ()=>{ 
 	emptyFormFields();
@@ -16247,10 +16263,11 @@ window.onload = ()=>{
 	select('#controls button#update').on('click',geocode);
 	select('#controls button#save').on('click',save);
 	select('#controls button#next').on('click',()=>fetchPlace());
-	// make a map
-	map = createMap('map').setView([43.67,-79.38],13);
+	// make a map and add all layers
+	map = createMap('map').setView(defaultCenter,defaultMaxZoom);
+	selectionLayer.addTo(map);
+	responseLayer.addTo(map);
 	tileLayer(`${mbMap}?access_token=${mbToken}`).addTo(map);
-	placesLayer = geoJSON(undefined,{'onEachFeature':addPopup}).addTo(map);
 };
 
 function search(event){
@@ -16271,7 +16288,7 @@ function search(event){
 				.join('li')
 				.text(d=>d.addr)
 				.on('click',event => {
-					fetchPlace(select(event.target).datum().geo_id); 
+					fetchPlace( select(event.target).datum().geo_id); 
 					undisplaySearchResults();
 				} );	
 		} );
@@ -16282,32 +16299,6 @@ function search(event){
 
 function undisplaySearchResults(){
 	selectAll('ol#search-results li').remove();
-}
-
-function addPopup(feature,layer){
-	let p = feature.properties;
-	let enName = p.namedetails['name:en'];
-	let frName = p.namedetails['name:fr'];
-	let popupHTML = `
-		<b>${p.namedetails.name}</b> 
-		${enName ? '| en: <b>'+enName+'</b>' : ''}
-		${frName ? '| fr: <b>'+frName+'</b>' : ''}
-		<br>
-		${p.matchquality.matchtype},
-		${p.matchquality.matchlevel},
-		${p.matchquality.matchcode}<br>`;
-		for( let [ key, value ] of Object.entries(p.address)){
-			popupHTML += `<b>${key}</b>: ${value}<br>`;
-		}
-	layer.bindPopup(popupHTML);
-	layer.on('click',(event) => {
-		console.log(event);
-		setFormData( {
-			'point_geojson': `{"type":"Point","coordinates":[${p.lon},${p.lat}]}`,
-			'osm_id':p.osm_id
-		} );
-		spot.setLatLng([p.lat,p.lon]).addTo(map);
-	} );
 }
 
 
@@ -16321,6 +16312,16 @@ function setFormData(newData){
 		select(`input[name="${key}"]`)
 			.property('value', value ? value : '');
 	}
+	selectionLayer.clearLayers();
+	if('point_geojson' in newData && newData.point_geojson){
+		let point = JSON.parse(newData.point_geojson);
+		selectionLayer.addData(point);
+	}
+	if('polygon_geojson' in newData && newData.polygon_geojson){
+		let polygon = JSON.parse(newData.polygon_geojson);
+		selectionLayer.addData(polygon);
+	}
+	map.fitBounds( selectionLayer.getBounds(), {maxZoom:defaultMaxZoom} );
 }
 
 function fetchPlace(geo_id){
@@ -16328,13 +16329,9 @@ function fetchPlace(geo_id){
 	if(!isNaN(geo_id)){ 
 		URL += `?geo_id=${geo_id}`;
 	}
-	// tidy up from before
-	placesLayer.clearLayers();
-	spot.remove();
 	// fetch data from server
-	json(URL) .then( response => {
+	json(URL).then( response => {
 		setFormData(response);
-		geocode();
 	} );
 }
 
@@ -16368,62 +16365,45 @@ function save(){
 }
 
 function geocode(){
-	placesLayer.clearLayers();
-	geocodeLocationIQ();
+	// geocode with Nominatim
+	let params = new URLSearchParams( {
+		'q': currentAddressString(), 'format': 'json', 'polygon_geojson': 1,
+		'matchquality': 1, 'namedetails': 1, 'addressdetails': 1, 'extratags': 1
+	} );
+	json(`https://nominatim.openstreetmap.org/search?${params.toString()}`)
+		.then( response => {
+			select('#geocoding-results')
+				.selectAll('li')
+				.data(response)
+				.join('li').text(d=>d.display_name)
+				.on('click',showGeoResult);
+		} );
 }
 
-function geocodeLocationIQ(){
-	let staticParams = {
-		'key': 'pk.3acf24fbf7ce2d8e0239a9e882b4919b',
-		'format': 'json',
-		'polygon_geojson': 1,
-		'matchquality': 1,
-		'namedetails': 1,
-		'addressdetails': 1,
-		'extratags': 1
-	};
-	let data = currentFormData();
+function showGeoResult(event){
+	let data = select(event.target).datum();
+	console.log(data);
+	responseLayer
+		.clearLayers()
+		.addData( data.geojson );
+	// if response is a polygon, ad the center point too
+	if(data.geojson.type='Polygon'){
+		responseLayer
+			.addData( {type:'Point',coordinates:[data.lon,data.lat]} );
+	}
+	map.fitBounds( 
+		selectionLayer
+			.getBounds()
+			.extend(responseLayer.getBounds()), 
+		{maxZoom:defaultMaxZoom} );
+}
+
+function currentAddressString(){
+	// use the available data to make an address query string
+	// e.g. "Toronto, Ontario, Canada"
+	let d = currentFormData();
 	let addressFields = [ 
-		data.district, 
-		data.city, 
-		data.county,
-		data.metro,
-		data.province,
-		data.subnational_region, 
-		data.country
-	];
-	let queryParams = { q: addressFields.filter(val=>val!='').join(', ') };
-	// merge static and query parameters
-	let params = new URLSearchParams({...staticParams,...queryParams});
-	json(`${locationIQ}?${params.toString()}`)
-		.then( response => {
-			console.log(response);
-			// convert response into properly formatted geoJSON
-			let geojsonPlaces = response.map( r => {
-				let place = r.geojson;
-				place.properties = { 
-					'lat': r.lat,
-					'lon': r.lon,
-					'class': r.class,
-					'type': r.type,
-					'osd_id':r.osm_id,
-					'osm_type': r.osm_type,
-					'matchquality':r.matchquality,
-					'namedetails':r.namedetails,
-					'address': r.address,
-					'osm_id' : r.osm_id
-				};
-				return place
-			} );
-			placesLayer.addData(geojsonPlaces);
-			map.fitBounds(
-				placesLayer.getBounds(),
-				{ 
-					maxZoom: 14, 
-					paddingTopLeft: [10,10],
-					paddingBottomRight: [200,10]
-				}
-			);
-		} )
-		.catch( err => console.warn('No matches for',queryParams) );
+		d.district, d.city, d.county, d.metro,
+		d.province, d.subnational_region, d.country ];
+	return addressFields.filter(v=>''!=v).join(', ')
 }
