@@ -11,54 +11,16 @@
 	<body>
 		<div id="controls">
 			<ol id="results"></ol>
-			<form>
-				<input name="search" placeholder="Search by geo_id or address" autocomplete="off"/>
+			
+			<input name="search" placeholder="Search by geo_id or address" autocomplete="off"/>
 				
-				<button type="button" id="update">Geocode</button>
-				<button type="button" id="save">Save Form</button>
-				<button type="button" id="next">Random</button>
+			<button type="button" id="update">Geocode</button>
+			<button type="button" id="save">Save Form</button>
+			<button type="button" id="next">Random</button>
 
-				<label for="geo_id">Geo-ID</label>
-				<input name="geo_id" readonly/>
-
-				<label for="country">Country</label>
-				<input type="text" name="country"/>
+			<div id="text-inputs"></div>
 				
-				<label for="subnational_region">Subnational Region</label>
-				<input type="text" name="subnational_region"/>
-
-				<label for="province">Province / State / Territory</label>
-				<input type="text" name="province"/>
-				
-				<label for="metro">Metro Area</label>
-				<input type="text" name="metro"/>
-				
-				<label for="county">County</label>
-				<input type="text" name="county"/>
-				
-				<label for="city">City</label>
-				<input type="text" name="city"/>
-				
-				<label for="district">Suburb / Neighborhood / District</label>
-				<input type="text" name="district"/>
-				
-				<label for="osm_id">OSM ID</label>
-				<input type="text" name="osm_id"/>
-				
-				<label for="osm_id_type">OSM Type ( point / boundary )</label>
-				<input type="text" name="osm_id_type"/>
-				
-				<label for="point_geojson">Point Location</label>
-				<input type="text" name="point_geojson"/>
-				
-				<label for="polygon_geojson">Polygon Location</label>
-				<input type="text" name="polygon_geojson"/>
-				
-				<label for="notes">Notes</label>
-				<input type="text" name="notes"/>
-
-			</form>
-		</div>
+		</div><!--#controls-->
 		<div id="map"></div>
 	</body>
 </html>

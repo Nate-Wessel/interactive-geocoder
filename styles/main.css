@@ -23,18 +23,39 @@ html, body {
 	height: 100%;
 	width: calc(100% - var(--panel-width)); }
 
-button, input {
+button {
 	display: block;
 	width: 100%;
 	margin-bottom: 7px; }
+
+#text-inputs {
+	display: flex;
+	flex-direction: column; }
+.input-container {
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center; }
+.input-container label { 
+	white-space: nowrap;
+	margin-right: 10px; }
+.input-container input {
+	flex: 2;
+	min-width: 10px; }
+#text-inputs .input-container.empty { 
+	order: 1; } /*throw empty inputs to the bottom*/
+#text-inputs .input-container.empty input { 
+	display: block; } 
 input {
-	width: calc(100% - var(--panel-padding));
+	margin: 3px; 
+	max-width: calc(100% - var(--panel-padding));
 	background: white;
 	border: 1px solid grey;
 	border-radius: 4px;
 	padding: 2px; }
 input:read-only {
 	background: yellow; }
+ 
 	
 #results {
 	position: absolute;

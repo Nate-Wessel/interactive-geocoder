@@ -14,6 +14,8 @@ if(array_key_exists('geo_id',$_GET)){
 }
 $result = pg_query($query);
 $record = pg_fetch_object($result);
+$record->point_geojson = json_decode($record->point_geojson);
+$record->polygon_geojson = json_decode($record->polygon_geojson);
 
 if(!$record){ // if no results returned
 	echo json_encode( array('id'=>NULL) );

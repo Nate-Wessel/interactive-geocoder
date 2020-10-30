@@ -46,6 +46,6 @@ SELECT
 	osm_id,
 	osm_id_type,
 	notes,
-	ST_AsGeoJSON(point) AS point_geojson,
-	ST_AsGeoJSON(polygon) AS polygon_geojson
+	ST_AsGeoJSON(point,5) AS point_geojson,
+	ST_AsGeoJSON(polygon,5) AS polygon_geojson
 FROM places;

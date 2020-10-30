@@ -6,35 +6,28 @@ require 'config.php';
 $connection = pg_connect($DBconnectionString);
 
 # get the posted JSON data
-$postedData = json_decode(file_get_contents('php://input'), true);
+$postedData = json_decode(file_get_contents('php://input'),false);
 
-$geo_id = $postedData['geo_id'];
-unset($postedData['geo_id']);
+$geo_id = $postedData->geo_id;
+unset($postedData->geo_id);
 
-$currentData = pg_fetch_array(
+$currentData = pg_fetch_object(
 	pg_query("SELECT * FROM places WHERE geo_id = $geo_id;")
 );
 
-// find values that have changed, only updating those
-$success = true;
+// find values that have changed
 $updates = [];
 foreach($currentData as $key => $currentValue){
 	// posted data with a corresponding key
-	if( array_key_exists($key,$postedData) ){
-		// set empty strings to null
-		$newval = $postedData[$key] == '' ? NULL : $postedData[$key];
-		if( $newval != $currentValue ){
-			$escaped_newval = pg_escape_literal($newval);
-			$result = pg_query("
-				UPDATE places SET $key = $escaped_newval 
-				WHERE geo_id = $geo_id;
-			");
-			if(!$result){ $success = false; }
-			$updates[$key] = [ $currentValue, $newval ];
-		}
+	if( property_exists($postedData,$key) ){
+		$newval = $postedData->$key;
+		if( $currentValue != $newval ){ $updates[$key] = $newval; }
 	}
 }
 
+$success = pg_update($connection,'places',$updates,array('geo_id'=>$geo_id));
+
+/*
 if(array_key_exists('point_geojson',$postedData)){
 	if($postedData['point_geojson'] != ''){
 		$point_geojson = pg_escape_literal($postedData['point_geojson']);
@@ -46,7 +39,7 @@ if(array_key_exists('point_geojson',$postedData)){
 		if(!$result){ $success = false; }
 	}
 }
-
+*/
 $outcome = [ 'success' => $success, 'updated' => $updates ];
 
 // return the record as updated

@@ -16251,6 +16251,19 @@ const selectionLayer = geoJSON( undefined, {
 	}
 } );
 
+const textInputFields = [
+	{'name':'geo_id','label':'geo_id','readonly':true},
+	{'name':'country','label':'Country'},
+	{'name':'subnational_region','label':'Subnational Region'},
+	{'name':'province','label':'Province/State'},
+	{'name':'metro','label':'Metro Area'},
+	{'name':'county','label':'County'},
+	{'name':'city','label':'City'},
+	{'name':'district','label':'Suburb/District'},
+	{'name':'osm_id','label':'OSM ID'},
+	{'name':'notes','label':'Notes'}
+];
+
 window.onload = ()=>{ 
 	emptyFormFields();
 	// add actions
@@ -16267,6 +16280,20 @@ window.onload = ()=>{
 	selectionLayer.addTo(map);
 	responseLayer.addTo(map);
 	tileLayer(`${mbMap}?access_token=${mbToken}`).addTo(map);
+	// create text input fields
+	let inputContainers = select('#text-inputs').selectAll('div')
+		.data(textInputFields).join('div')
+		.classed('input-container empty',true);
+	inputContainers.append('input').attr('type','text')
+		.attr('name',d=>d.name)
+		.attr('readonly',d=>'readonly' in d ? 'true' : null );
+	inputContainers.append('label').attr('for',d=>d.name).text(d=>d.label);
+	inputContainers
+		.selectAll('input')
+		.on('unfocus change',(event)=>{
+			select(event.target.parentNode)
+				.classed('empty',event.target.value.trim()=='');
+		});	
 };
 
 function search(event){
@@ -16299,26 +16326,40 @@ function search(event){
 function hideResults(){
 	selectAll('ol#results li').remove();
 }
-
+/*
+function addPopup(feature,layer){
+	let p = feature.properties
+	let enName = p.namedetails['name:en']
+	let frName = p.namedetails['name:fr']
+	let popupHTML = `
+		<b>${p.namedetails.name}</b> 
+		${enName ? '| en: <b>'+enName+'</b>' : ''}
+		${frName ? '| fr: <b>'+frName+'</b>' : ''}
+		<br>`
+		for( let [ key, value ] of Object.entries(p.address)){
+			popupHTML += `<b>${key}</b>: ${value}<br>`
+		}
+	layer.bindPopup(popupHTML)
+}
+*/
 
 function emptyFormFields(){
-	selectAll('form input').property('value','');
+	selectAll('#text-inputs input').property('value','');
 }
 
 function setFormData(newData){
 	// iterate over data object setting corresponding form elements
 	for( let [ key, value ] of Object.entries(newData)){
 		select(`input[name="${key}"]`)
-			.property('value', value ? value : '');
+			.property('value', value ? value : '')
+			.dispatch('change');
 	}
 	selectionLayer.clearLayers();
 	if('point_geojson' in newData && newData.point_geojson){
-		let point = JSON.parse(newData.point_geojson);
-		selectionLayer.addData(point);
+		selectionLayer.addData(newData.point_geojson);
 	}
 	if('polygon_geojson' in newData && newData.polygon_geojson){
-		let polygon = JSON.parse(newData.polygon_geojson);
-		selectionLayer.addData(polygon);
+		selectionLayer.addData(newData.polygon_geojson);
 	}
 	map.fitBounds( selectionLayer.getBounds(), {maxZoom:defaultMaxZoom} );
 }
@@ -16336,10 +16377,10 @@ function fetchPlace(geo_id){
 
 function currentFormData(){
 	let data = {};
-	selectAll('form input').each(function(d,i){
+	selectAll('#text-inputs input').each(function(d,i){
 		let key = select(this).property('name');
 		let val = select(this).property('value').trim();
-		data[key] = val;
+		data[key] = val == '' ? null : val;
 	} );
 	return data
 }
@@ -16355,7 +16396,8 @@ function save(){
 			console.log(response); 
 			// give feedback on updated form fields
 			for( [key,val] of Object.entries(response.updated)){
-				select(`input[name="${key}"]`)
+				console.log(key,val);
+				select(`#text-inputs input[name="${key}"]`)
 					.style('background-color',val?'green':'red')
 					.transition().duration(2000)
 					.style('background-color',null);
@@ -16371,10 +16413,7 @@ function geocode(){
 		'q': currentAddressString(), 'format': 'json', 'polygon_geojson': 1,
 		'matchquality': 1, 'namedetails': 1, 'addressdetails': 1, 'extratags': 1
 	} );
-	let URL = `https://nominatim.openstreetmap.org/search?${params.toString()}`;
-	
-	console.log(nominatimData);
-	
+	let URL = `https://nominatim.openstreetmap.org/search?${params.toString()}`;	
 	if( URL in nominatimData ){ // this exact request has already been made
 		return showResults(nominatimData[URL])
 	}
