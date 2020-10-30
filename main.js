@@ -45,8 +45,7 @@ const textInputFields = [
 	{'name':'notes','label':'Notes'}
 ]
 
-window.onload = ()=>{ 
-	emptyFormFields()
+window.onload = ()=>{
 	// add actions
 	select('input[name="search"]')
 		.on('input focus',search)
@@ -87,21 +86,16 @@ function search(event){
 	}else if(searchTerm.trim().length > 2){
 		resource = `${server}/suggester.php?addr=${searchTerm}`
 	}
-	if(resource){
-		json(resource).then( response => {
-			select('ol#results')
-				.selectAll('li')
-				.data(response,d=>d.geo_id)
-				.join('li').classed('own-search',true)
-				.text(d=>d.addr)
-				.on('click',event => {
-					fetchPlace( select(event.target).datum().geo_id) 
-					hideResults()
-				} )	
-		} )
-	}else{
-		hideResults()
-	}
+	if(!resource){ return hideResults(); }
+	json(resource).then( response => {
+		select('ol#results').selectAll('li')
+			.data(response,d=>d.geo_id)
+			.join('li').classed('own-search',true).text(d=>d.addr)
+			.on('click',event => {
+				fetchPlace( select(event.target).datum().geo_id) 
+				hideResults()
+			} )	
+	} )
 }
 
 function hideResults(){
@@ -124,10 +118,6 @@ function addPopup(feature,layer){
 }
 */
 
-function emptyFormFields(){
-	selectAll('#text-inputs input').property('value','')
-}
-
 function setFormData(newData){
 	// iterate over data object setting corresponding form elements
 	for( let [ key, value ] of Object.entries(newData)){
@@ -147,18 +137,14 @@ function setFormData(newData){
 
 function fetchPlace(geo_id){
 	let URL = `${server}/get-place.php`
-	if(!isNaN(geo_id)){ 
-		URL += `?geo_id=${geo_id}`
-	}
+	if( !isNaN(geo_id) ) URL += `?geo_id=${geo_id}`;
 	// fetch data from server
-	json(URL).then( response => {
-		setFormData(response)
-	} )
+	json(URL).then( response => setFormData(response) )
 }
 
 function currentFormData(){
 	let data = {}
-	selectAll('#text-inputs input').each(function(d,i){
+	selectAll('#text-inputs input').each(function(){
 		let key = select(this).property('name')
 		let val = select(this).property('value').trim()
 		data[key] = val == '' ? null : val
@@ -174,7 +160,6 @@ function save(){
 	}
 	json(`${server}/update.php`, options )
 		.then( response => {
-			console.log(response) 
 			// give feedback on updated form fields
 			for( [key,val] of Object.entries(response.updated)){
 				console.log(key,val)
@@ -187,7 +172,6 @@ function save(){
 }
 
 const nominatimData = {}
-
 function geocode(){
 	// geocode with Nominatim
 	let params = new URLSearchParams( {
