@@ -16320,22 +16320,6 @@ function search(event){
 function hideResults(){
 	selectAll('ol#results li').remove();
 }
-/*
-function addPopup(feature,layer){
-	let p = feature.properties
-	let enName = p.namedetails['name:en']
-	let frName = p.namedetails['name:fr']
-	let popupHTML = `
-		<b>${p.namedetails.name}</b> 
-		${enName ? '| en: <b>'+enName+'</b>' : ''}
-		${frName ? '| fr: <b>'+frName+'</b>' : ''}
-		<br>`
-		for( let [ key, value ] of Object.entries(p.address)){
-			popupHTML += `<b>${key}</b>: ${value}<br>`
-		}
-	layer.bindPopup(popupHTML)
-}
-*/
 
 function setFormData(newData){
 	// iterate over data object setting corresponding form elements
@@ -16419,6 +16403,7 @@ function geocode(){
 function showGeoResult(event){
 	let data = select(event.target).datum();
 	console.log(data);
+	// add spatial data to the map
 	responseLayer
 		.clearLayers()
 		.addData( data.geojson );
@@ -16432,6 +16417,36 @@ function showGeoResult(event){
 			.getBounds()
 			.extend(responseLayer.getBounds()), 
 		{maxZoom:defaultMaxZoom} );
+	// add textual data to the div
+	let div = select('#selected-match');
+	div.selectAll('p,h3,h4').remove();
+	// append info
+	div.append('h3')
+		.text(data.namedetails.name);
+	// get other names 
+	let translations = new Set();
+	if('name:en' in data.namedetails){ 
+		translations.add(data.namedetails['name:en']); 
+	}
+	if('name:fr' in data.namedetails){ 
+		translations.add(data.namedetails['name:fr']); 
+	}
+	translations.delete(data.namedetails.name);
+	if(translations.size > 0){
+		div.append('p').text(`(${[...translations].join(' | ')})`);
+	}
+	// link to OSM
+	let osmLink = `https://www.openstreetmap.org/${data.osm_type}/${data.osm_id}`;
+	div.append('p').append('a').attr('href',osmLink).attr('target','_blank')
+		.text(`OSM ${data.osm_type}`);
+	// wikipedia
+	if('wikipedia' in data.extratags){
+		let enPage = 'wikipedia:en' in data.extratags ? 
+			data.extratags['wikipedia:en'] : data.extratags.wikipedia;
+		let wikiLink = `https://en.wikipedia.org/wiki/${enPage}`;
+		div.append('p').append('a').attr('href',wikiLink).attr('target','_blank')
+			.text(enPage);
+	}
 }
 
 function currentAddressString(){
