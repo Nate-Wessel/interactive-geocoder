@@ -16192,9 +16192,6 @@ function json(input, init) {
 }
 
 const server = 'http://localhost/interactive-geocoder/server';
-const defaultMaxZoom = 13;
-
-var map;
 const responseLayer = geoJSON( undefined, {
 	'style': { color: 'red' },
 	'pointToLayer': ( feature, latlng ) => {
@@ -16207,6 +16204,19 @@ const selectionLayer = geoJSON( undefined, {
 		return circleMarker( latlng, { radius: 10, color: 'blue' } )
 	}
 } );
+
+const textInputFields = [
+	{'name':'geo_id','label':'geo_id','readonly':true},
+	{'name':'country','label':'Country'},
+	{'name':'subnational_region','label':'Subnational Region'},
+	{'name':'province','label':'Province/State'},
+	{'name':'metro','label':'Metro Area'},
+	{'name':'county','label':'County'},
+	{'name':'city','label':'City'},
+	{'name':'district','label':'Suburb/District'},
+	{'name':'osm_id','label':'OSM ID'},
+	{'name':'notes','label':'Notes'}
+];
 
 window.onload = ()=>{
 	addSearchBarTo('body');
@@ -16222,19 +16232,6 @@ window.onload = ()=>{
 	responseLayer.addTo(map)
 	tileLayer(`${mbMap}?access_token=${mbToken}`).addTo(map)
 	// create text input fields
-	let inputContainers = select('#text-inputs').selectAll('div')
-		.data(textInputFields).join('div')
-		.classed('input-container empty',true)
-	inputContainers.append('input').attr('type','text')
-		.attr('name',d=>d.name)
-		.attr('readonly',d=>'readonly' in d ? 'true' : null )
-	inputContainers.append('label').attr('for',d=>d.name).text(d=>d.label)
-	inputContainers
-		.selectAll('input')
-		.on('unfocus change',(event)=>{
-			select(event.target.parentNode)
-				.classed('empty',event.target.value.trim()=='')
-		})	
 */
 };
 
@@ -16274,8 +16271,7 @@ function showPlaceResults(results,searchBar){
 		.data(d=>d,d=>d.geo_id)
 		.join('li').classed('own-search',true).text(d=>d.addr)
 		.on('click',event => {
-			fetchPlace( select(event.target).datum().geo_id);
-			hideResults();
+			showExistingPlace( select(event.target).datum().geo_id);
 		} );
 	// display "new place" button 
 	resultsList
@@ -16286,34 +16282,47 @@ function showPlaceResults(results,searchBar){
 }
 
 function newPlaceForm(){
-	console.log('empty function called');
-	// TODO
+	// TODO clear page and add form to create new place
+}
+
+function showExistingPlace(geo_id){
+	// clear the page
+	let body = select('body').selectChildren().remove();
+	// fetch the data
+	let URL = `${server}/get-place.php${isNaN(geo_id)?'':'?geo_id='+geo_id}`;
+	json(URL).then( response => {
+		addPlaceFormTo('body',response);
+	} );
+}
+
+function addPlaceFormTo(selector,data={}){
+	let form = select(selector).append('form').classed('place',true);
+	let inputContainers = form.selectAll('div.input-container')
+		.data(textInputFields).join('div')
+		.classed('input-container',true)
+		.classed('empty',d => {
+			return ((d.name in data) && data[d.name]) ? null : true 
+		} );
+	inputContainers
+		.append('input')
+		.attr('type','text')
+		.attr('name',d=>d.name)
+		.attr('readonly',d=>'readonly' in d ? 'true' : null )
+		.property('value',d => (d.name in data) ? data[d.name] : null );
+		
+	inputContainers
+		.append('label')
+		.attr('for',d=>d.name)
+		.text(d=>d.label);
+	inputContainers
+		.selectAll('input')
+		.on('unfocus change',(event)=>{
+			select(event.target.parentNode)
+				.classed('empty',event.target.value.trim()=='');
+		});	
+	return form
 }
 
 function hideResults(){
-	select('ol#search-results').remove();
-}
-
-function setFormData(newData){
-	// iterate over data object setting corresponding form elements
-	for( let [ key, value ] of Object.entries(newData)){
-		select(`input[name="${key}"]`)
-			.property('value', value ? value : '')
-			.dispatch('change');
-	}
-	selectionLayer.clearLayers();
-	if('point_geojson' in newData && newData.point_geojson){
-		selectionLayer.addData(newData.point_geojson);
-	}
-	if('polygon_geojson' in newData && newData.polygon_geojson){
-		selectionLayer.addData(newData.polygon_geojson);
-	}
-	map.fitBounds( selectionLayer.getBounds(), {maxZoom:defaultMaxZoom} );
-}
-
-function fetchPlace(geo_id){
-	let URL = `${server}/get-place.php`;
-	if( !isNaN(geo_id) ) URL += `?geo_id=${geo_id}`;
-	// fetch data from server
-	json(URL).then( response => setFormData(response) );
+	select('.search .results').remove();
 }

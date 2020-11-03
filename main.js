@@ -59,19 +59,6 @@ window.onload = ()=>{
 	responseLayer.addTo(map)
 	tileLayer(`${mbMap}?access_token=${mbToken}`).addTo(map)
 	// create text input fields
-	let inputContainers = select('#text-inputs').selectAll('div')
-		.data(textInputFields).join('div')
-		.classed('input-container empty',true)
-	inputContainers.append('input').attr('type','text')
-		.attr('name',d=>d.name)
-		.attr('readonly',d=>'readonly' in d ? 'true' : null )
-	inputContainers.append('label').attr('for',d=>d.name).text(d=>d.label)
-	inputContainers
-		.selectAll('input')
-		.on('unfocus change',(event)=>{
-			select(event.target.parentNode)
-				.classed('empty',event.target.value.trim()=='')
-		})	
 */
 }
 
@@ -111,8 +98,7 @@ function showPlaceResults(results,searchBar){
 		.data(d=>d,d=>d.geo_id)
 		.join('li').classed('own-search',true).text(d=>d.addr)
 		.on('click',event => {
-			fetchPlace( select(event.target).datum().geo_id)
-			hideResults()
+			showExistingPlace( select(event.target).datum().geo_id)
 		} )
 	// display "new place" button 
 	resultsList
@@ -123,12 +109,49 @@ function showPlaceResults(results,searchBar){
 }
 
 function newPlaceForm(){
-	console.log('empty function called')
-	// TODO
+	// TODO clear page and add form to create new place
+}
+
+function showExistingPlace(geo_id){
+	// clear the page
+	let body = select('body').selectChildren().remove()
+	// fetch the data
+	let URL = `${server}/get-place.php${isNaN(geo_id)?'':'?geo_id='+geo_id}`
+	json(URL).then( response => {
+		addPlaceFormTo('body',response)
+	} )
+}
+
+function addPlaceFormTo(selector,data={}){
+	let form = select(selector).append('form').classed('place',true)
+	let inputContainers = form.selectAll('div.input-container')
+		.data(textInputFields).join('div')
+		.classed('input-container',true)
+		.classed('empty',d => {
+			return ((d.name in data) && data[d.name]) ? null : true 
+		} )
+	inputContainers
+		.append('input')
+		.attr('type','text')
+		.attr('name',d=>d.name)
+		.attr('readonly',d=>'readonly' in d ? 'true' : null )
+		.property('value',d => (d.name in data) ? data[d.name] : null )
+		
+	inputContainers
+		.append('label')
+		.attr('for',d=>d.name)
+		.text(d=>d.label)
+	inputContainers
+		.selectAll('input')
+		.on('unfocus change',(event)=>{
+			select(event.target.parentNode)
+				.classed('empty',event.target.value.trim()=='')
+		})	
+	return form
 }
 
 function hideResults(){
-	select('ol#search-results').remove()
+	select('.search .results').remove()
 }
 
 function setFormData(newData){
@@ -146,13 +169,6 @@ function setFormData(newData){
 		selectionLayer.addData(newData.polygon_geojson)
 	}
 	map.fitBounds( selectionLayer.getBounds(), {maxZoom:defaultMaxZoom} )
-}
-
-function fetchPlace(geo_id){
-	let URL = `${server}/get-place.php`
-	if( !isNaN(geo_id) ) URL += `?geo_id=${geo_id}`;
-	// fetch data from server
-	json(URL).then( response => setFormData(response) )
 }
 
 function currentFormData(){

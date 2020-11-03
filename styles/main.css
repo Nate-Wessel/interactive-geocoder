@@ -37,8 +37,8 @@ html, body {
 	color: var(--text);
 	background-color: var(--bg); }
 
-/* search bar only: centered on screen */
-body > .search {
+body > .search,
+body > form {
 	position: fixed;
 	top: 50%;
 	left: 50%;
@@ -58,10 +58,42 @@ body > .search {
 .search .results li:hover {
 	background-color: var(--orange); }
 
+form {
+	max-width: 300px;
+	display: flex;
+	flex-direction: column; }
+form .input-container {
+	width: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	order: 0; }
+form .input-container.empty { 
+	order: 1; } /*throw empty inputs to the bottom*/
+form .input-container label { 
+	white-space: nowrap;
+	margin-left: 10px; }
+form .input-container input {
+	flex: 2;
+	min-width: 50px; }
+
+form .input-container.empty input { 
+	display: block; } 
+input {
+	margin: 3px; 
+	max-width: calc(100% - var(--panel-padding));
+	background: white;
+	border: 1px solid grey;
+	border-radius: 4px;
+	padding: 2px; }
+input:read-only {
+	background: var(--orange); }
 
 
-
-
+button {
+	display: block;
+	width: 100%;
+	margin-bottom: 7px; }
 
 #controls {
 	position: absolute;
@@ -76,40 +108,6 @@ body > .search {
 	position: absolute;
 	height: 100%;
 	width: calc(100% - var(--panel-width)); }
-
-button {
-	display: block;
-	width: 100%;
-	margin-bottom: 7px; }
-
-#text-inputs {
-	display: flex;
-	flex-direction: column; }
-.input-container {
-	width: 100%;
-	display: flex;
-	flex-direction: row;
-	align-items: center; }
-.input-container label { 
-	white-space: nowrap;
-	margin-right: 10px; }
-.input-container input {
-	flex: 2;
-	min-width: 10px; }
-#text-inputs .input-container.empty { 
-	order: 1; } /*throw empty inputs to the bottom*/
-#text-inputs .input-container.empty input { 
-	display: block; } 
-input {
-	margin: 3px; 
-	max-width: calc(100% - var(--panel-padding));
-	background: white;
-	border: 1px solid grey;
-	border-radius: 4px;
-	padding: 2px; }
-input:read-only {
-	background: yellow; }
- 
 	
 #results {
 	position: absolute;
