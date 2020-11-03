@@ -16220,19 +16220,6 @@ const textInputFields = [
 
 window.onload = ()=>{
 	addSearchBarTo('body');
-/*
-	select('#controls button#update').on('click',geocode)
-	select('#controls button#save').on('click',save)
-	select('#controls button#next').on('click',()=>fetchPlace())
-	// make a map and add all layers
-	map = leafletMap('map')
-		.setView(defaultCenter,defaultMaxZoom)
-		.on('click drag',hideResults)
-	selectionLayer.addTo(map)
-	responseLayer.addTo(map)
-	tileLayer(`${mbMap}?access_token=${mbToken}`).addTo(map)
-	// create text input fields
-*/
 };
 
 function addSearchBarTo(selector){
@@ -16243,7 +16230,7 @@ function addSearchBarTo(selector){
 		.attr('placeholder','Search by name or geo_id')
 		.attr('autocomplete','off')
 		.on('input focus',search)
-		.on('unfocus',hideResults);
+		.on('unfocus',clearResults);
 }
 
 function search(event){
@@ -16255,8 +16242,9 @@ function search(event){
 		resource = `${server}/suggester.php?geo_id=${Number(searchTerm)}`;
 	}else if(searchTerm.trim().length > 2){
 		resource = `${server}/suggester.php?addr=${searchTerm}`;
+	}else { 
+		return clearResults();
 	}
-	if(!resource){ return hideResults(); }
 	json(resource).then( response => {
 		showPlaceResults(response,event.target); 
 	} );
@@ -16271,6 +16259,8 @@ function showPlaceResults(results,searchBar){
 		.data(d=>d,d=>d.geo_id)
 		.join('li').classed('own-search',true).text(d=>d.addr)
 		.on('click',event => {
+			select('.search input').property('value','');
+			clearResults();
 			showExistingPlace( select(event.target).datum().geo_id);
 		} );
 	// display "new place" button 
@@ -16286,8 +16276,6 @@ function newPlaceForm(){
 }
 
 function showExistingPlace(geo_id){
-	// clear the page
-	let body = select('body').selectChildren().remove();
 	// fetch the data
 	let URL = `${server}/get-place.php${isNaN(geo_id)?'':'?geo_id='+geo_id}`;
 	json(URL).then( response => {
@@ -16295,34 +16283,53 @@ function showExistingPlace(geo_id){
 	} );
 }
 
-function addPlaceFormTo(selector,data={}){
-	let form = select(selector).append('form').classed('place',true);
-	let inputContainers = form.selectAll('div.input-container')
-		.data(textInputFields).join('div')
-		.classed('input-container',true)
-		.classed('empty',d => {
-			return ((d.name in data) && data[d.name]) ? null : true 
-		} );
-	inputContainers
-		.append('input')
-		.attr('type','text')
-		.attr('name',d=>d.name)
-		.attr('readonly',d=>'readonly' in d ? 'true' : null )
-		.property('value',d => (d.name in data) ? data[d.name] : null );
-		
-	inputContainers
-		.append('label')
-		.attr('for',d=>d.name)
-		.text(d=>d.label);
-	inputContainers
-		.selectAll('input')
-		.on('unfocus change',(event)=>{
-			select(event.target.parentNode)
-				.classed('empty',event.target.value.trim()=='');
-		});	
-	return form
+function addPlaceFormTo(selector,placeData={}){
+	select(selector)
+		.selectAll('form.place')
+		.data([textInputFields]).join('form').classed('place',true)
+		.selectAll('div.input-container')
+		.data(d=>d,d=>d.name)
+		.join(
+			enter => {
+				let container = enter.append('div')
+					.classed('input-container',true);
+				container.append('input')
+					.attr('type','text')
+					.attr('name',d=>d.name)
+					.attr('readonly',d=>'readonly' in d ? 'true' : null )
+					.on('unfocus change',checkIfEmpty)
+					.property('value',d => {
+						return (d.name in placeData) ? placeData[d.name] : ''
+					} )
+					.dispatch('change');
+				container.append('label')
+					.attr('for',d=>d.name)
+					.text(d=>d.label);
+			},
+			update => { 
+				update.select('input') 
+					.property('value',d => {
+						return (d.name in placeData) ? placeData[d.name] : ''
+					} )
+					.dispatch('change');
+			}
+		);
+	function checkIfEmpty(event){
+		select(event.target.parentNode)
+			.classed('empty',event.target.value.trim()=='');
+	}
 }
 
-function hideResults(){
+function clearResults(){
 	select('.search .results').remove();
 }
+
+
+/*
+	// make a map and add all layers
+	map = leafletMap('map')
+		.setView(defaultCenter,defaultMaxZoom)
+	selectionLayer.addTo(map)
+	responseLayer.addTo(map)
+	tileLayer(`${mbMap}?access_token=${mbToken}`).addTo(map)
+*/
