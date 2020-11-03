@@ -46,10 +46,8 @@ const textInputFields = [
 ]
 
 window.onload = ()=>{
-	// add actions
-	select('input[name="search"]')
-		.on('input focus',search)
-		.on('unfocus',hideResults)
+	addSearchBarTo('body')
+/*
 	select('#controls button#update').on('click',geocode)
 	select('#controls button#save').on('click',save)
 	select('#controls button#next').on('click',()=>fetchPlace())
@@ -74,6 +72,18 @@ window.onload = ()=>{
 			select(event.target.parentNode)
 				.classed('empty',event.target.value.trim()=='')
 		})	
+*/
+}
+
+function addSearchBarTo(selector){
+	select(selector)
+		.append('div').classed('search',true)
+		.append('input')
+		.attr('type','text')
+		.attr('placeholder','Search by name or geo_id')
+		.attr('autocomplete','off')
+		.on('input focus',search)
+		.on('unfocus',hideResults)
 }
 
 function search(event){
@@ -88,18 +98,37 @@ function search(event){
 	}
 	if(!resource){ return hideResults(); }
 	json(resource).then( response => {
-		select('ol#results').selectAll('li')
-			.data(response,d=>d.geo_id)
-			.join('li').classed('own-search',true).text(d=>d.addr)
-			.on('click',event => {
-				fetchPlace( select(event.target).datum().geo_id) 
-				hideResults()
-			} )	
+		showPlaceResults(response,event.target) 
 	} )
 }
 
+function showPlaceResults(results,searchBar){
+	// append results list right after search bar
+	let resultsList = select(searchBar.parentNode)
+		.selectAll('ol.results')
+		.data([results]).join('ol').classed('results',true)
+	resultsList.selectAll('li')
+		.data(d=>d,d=>d.geo_id)
+		.join('li').classed('own-search',true).text(d=>d.addr)
+		.on('click',event => {
+			fetchPlace( select(event.target).datum().geo_id)
+			hideResults()
+		} )
+	// display "new place" button 
+	resultsList
+		.selectAll('li#new-place')
+		.data([{'id':'1'}]).join('li').attr('id','new-place')
+		.append('button').on('click',newPlaceForm)
+		.text('New Place')
+}
+
+function newPlaceForm(){
+	console.log('empty function called')
+	// TODO
+}
+
 function hideResults(){
-	selectAll('ol#results li').remove()
+	select('ol#search-results').remove()
 }
 
 function setFormData(newData){
