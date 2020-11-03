@@ -93,12 +93,14 @@ function showPlaceResults(results,searchBar){
 	resultsList
 		.selectAll('li#new-place')
 		.data([{'id':'1'}]).join('li').attr('id','new-place')
-		.append('button').on('click',newPlaceForm)
+		.append('button')
+		.on('click',newPlaceForm)
 		.text('New Place')
 }
 
 function newPlaceForm(){
-	// TODO clear page and add form to create new place
+	clearResults()
+	addPlaceFormTo('body',{geo_id:'NA'})
 }
 
 function showExistingPlace(geo_id){
@@ -128,6 +130,7 @@ function addPlaceFormTo(selector,placeData={}){
 						return (d.name in placeData) ? placeData[d.name] : ''
 					} )
 					.dispatch('change')
+					.on('input',checkIfDifferent)
 				container.append('label')
 					.attr('for',d=>d.name)
 					.text(d=>d.label)
@@ -143,6 +146,14 @@ function addPlaceFormTo(selector,placeData={}){
 	function checkIfEmpty(event){
 		select(event.target.parentNode)
 			.classed('empty',event.target.value.trim()=='')
+	}
+	function checkIfDifferent(event){
+		// check current form value against original value from DB
+		let field = select(event.target).attr('name')
+		let orig = (field in placeData && placeData[field]) ? placeData[field] : ''
+		let curr = event.target.value.trim()
+		select(event.target)
+			.style('background-color',curr != orig ? 'pink' : null)
 	}
 }
 
