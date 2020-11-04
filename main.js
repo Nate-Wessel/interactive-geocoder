@@ -8,7 +8,7 @@ import { select, selectAll } from 'd3-selection'
 import { transition } from 'd3-transition'
 import { json } from 'd3-fetch'
 
-const server = 'http://localhost/interactive-geocoder/server'
+const server = 'http://localhost/places-db-admin/server'
 
 const mbMap =   'https://api.mapbox.com/styles/v1/apfcanada/'+
                 'ckgl4ahu31y5e19o0gt1z6ymb/tiles/256/{z}/{x}/{y}'

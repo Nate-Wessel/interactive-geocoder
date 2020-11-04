@@ -16191,7 +16191,7 @@ function json(input, init) {
   return fetch(input, init).then(responseJson);
 }
 
-const server = 'http://localhost/interactive-geocoder/server';
+const server = 'http://localhost/places-db-admin/server';
 const responseLayer = geoJSON( undefined, {
 	'style': { color: 'red' },
 	'pointToLayer': ( feature, latlng ) => {
