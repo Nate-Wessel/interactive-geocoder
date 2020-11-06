@@ -4547,6 +4547,20 @@ var Map$1 = Evented.extend({
 	}
 });
 
+// @section
+
+// @factory L.map(id: String, options?: Map options)
+// Instantiates a map object given the DOM ID of a `<div>` element
+// and optionally an object literal with `Map options`.
+//
+// @alternative
+// @factory L.map(el: HTMLElement, options?: Map options)
+// Instantiates a map object given an instance of a `<div>` HTML element
+// and optionally an object literal with `Map options`.
+function createMap(id, options) {
+	return new Map$1(id, options);
+}
+
 /*
  * @class Control
  * @aka L.Control
@@ -11467,6 +11481,14 @@ var TileLayer = GridLayer.extend({
 	}
 });
 
+
+// @factory L.tilelayer(urlTemplate: String, options?: TileLayer options)
+// Instantiates a tile layer object given a `URL template` and optionally an options object.
+
+function tileLayer(url, options) {
+	return new TileLayer(url, options);
+}
+
 /*
  * @class TileLayer.WMS
  * @inherits TileLayer
@@ -11592,7 +11614,15 @@ var TileLayerWMS = TileLayer.extend({
 	}
 });
 
+
+// @factory L.tileLayer.wms(baseUrl: String, options: TileLayer.WMS options)
+// Instantiates a WMS tile layer object given a base URL of the WMS service and a WMS parameters/options object.
+function tileLayerWMS(url, options) {
+	return new TileLayerWMS(url, options);
+}
+
 TileLayer.WMS = TileLayerWMS;
+tileLayer.wms = tileLayerWMS;
 
 /*
  * @class Renderer
@@ -16192,6 +16222,15 @@ function json(input, init) {
 }
 
 const server = 'http://localhost/places-db-admin/server';
+
+const mbMap =   'https://api.mapbox.com/styles/v1/apfcanada/'+
+                'ckgl4ahu31y5e19o0gt1z6ymb/tiles/256/{z}/{x}/{y}';
+const mbToken = 'pk.eyJ1IjoiYXBmY2FuYWRhIiwiYSI6ImNrY3hpdzcwbz'+
+                'AwZzIydms3NGRtZzY2eXIifQ.E7PbT0YGmjJjLiLmyRWSuw';
+
+const defaultMaxZoom = 13;
+
+var map;
 const responseLayer = geoJSON( undefined, {
 	'style': { color: 'red' },
 	'pointToLayer': ( feature, latlng ) => {
@@ -16219,19 +16258,16 @@ const textInputFields = [
 ];
 
 window.onload = ()=>{
-	addSearchBarTo('body');
-};
-
-function addSearchBarTo(selector){
-	select(selector)
-		.append('div').classed('search',true)
-		.append('input')
-		.attr('type','text')
-		.attr('placeholder','Search by name or geo_id')
-		.attr('autocomplete','off')
+	// set up search bar
+	select('.search input')
 		.on('input focus',search)
 		.on('unfocus',clearResults);
-}
+	// initialize the map
+	map = createMap('map');
+	responseLayer.addTo(map);
+	selectionLayer.addTo(map);
+	tileLayer(`${mbMap}?access_token=${mbToken}`).addTo(map);
+};
 
 function search(event){
 	// handles input/changes to the search parameters
@@ -16274,7 +16310,7 @@ function showPlaceResults(results,searchBar){
 
 function newPlaceForm(){
 	clearResults();
-	addPlaceFormTo('body',{geo_id:'NA'});
+	addPlaceFormTo('body',{geo_id:'A new value will be assigned'});
 }
 
 function showExistingPlace(geo_id){
@@ -16282,7 +16318,27 @@ function showExistingPlace(geo_id){
 	let URL = `${server}/get-place.php${isNaN(geo_id)?'':'?geo_id='+geo_id}`;
 	json(URL).then( response => {
 		addPlaceFormTo('body',response);
+		if(response.point_geojson){ // if not null
+			showMap(response.point_geojson);
+		}else {
+			hideMap();
+		}
 	} );
+}
+
+function showMap(geojson){
+	responseLayer.clearLayers().addData( geojson );
+	select('#map').style('display','block');
+	map.fitBounds( 
+		selectionLayer
+			.getBounds()
+			.extend(responseLayer.getBounds()), 
+		{maxZoom:defaultMaxZoom} );
+	
+}
+
+function hideMap(){
+	select('#map').style('display',null);
 }
 
 function addPlaceFormTo(selector,placeData={}){
@@ -16334,13 +16390,3 @@ function addPlaceFormTo(selector,placeData={}){
 function clearResults(){
 	select('.search .results').remove();
 }
-
-
-/*
-	// make a map and add all layers
-	map = leafletMap('map')
-		.setView(defaultCenter,defaultMaxZoom)
-	selectionLayer.addTo(map)
-	responseLayer.addTo(map)
-	tileLayer(`${mbMap}?access_token=${mbToken}`).addTo(map)
-*/

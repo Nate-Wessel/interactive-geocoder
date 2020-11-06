@@ -87,6 +87,12 @@ input {
 input:read-only {
 	background: var(--orange); }
 
+#map {
+	display: none;
+	height: 500px;
+	width: 400px; }
+
+
 
 button {
 	display: block;
@@ -102,10 +108,6 @@ button {
 	background: var(--panel-bg);
 	border-left: 2px solid grey;
 	z-index: 999; }
-#map {
-	position: absolute;
-	height: 100%;
-	width: calc(100% - var(--panel-width)); }
 	
 #results {
 	position: absolute;

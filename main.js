@@ -45,18 +45,15 @@ const textInputFields = [
 ]
 
 window.onload = ()=>{
-	addSearchBarTo('body')
-}
-
-function addSearchBarTo(selector){
-	select(selector)
-		.append('div').classed('search',true)
-		.append('input')
-		.attr('type','text')
-		.attr('placeholder','Search by name or geo_id')
-		.attr('autocomplete','off')
+	// set up search bar
+	select('.search input')
 		.on('input focus',search)
 		.on('unfocus',clearResults)
+	// initialize the map
+	map = leafletMap('map')
+	responseLayer.addTo(map)
+	selectionLayer.addTo(map)
+	tileLayer(`${mbMap}?access_token=${mbToken}`).addTo(map)
 }
 
 function search(event){
@@ -100,7 +97,7 @@ function showPlaceResults(results,searchBar){
 
 function newPlaceForm(){
 	clearResults()
-	addPlaceFormTo('body',{geo_id:'NA'})
+	addPlaceFormTo('body',{geo_id:'A new value will be assigned'})
 }
 
 function showExistingPlace(geo_id){
@@ -108,7 +105,27 @@ function showExistingPlace(geo_id){
 	let URL = `${server}/get-place.php${isNaN(geo_id)?'':'?geo_id='+geo_id}`
 	json(URL).then( response => {
 		addPlaceFormTo('body',response)
+		if(response.point_geojson){ // if not null
+			showMap(response.point_geojson)
+		}else{
+			hideMap()
+		}
 	} )
+}
+
+function showMap(geojson){
+	responseLayer.clearLayers().addData( geojson )
+	select('#map').style('display','block')
+	map.fitBounds( 
+		selectionLayer
+			.getBounds()
+			.extend(responseLayer.getBounds()), 
+		{maxZoom:defaultMaxZoom} )
+	
+}
+
+function hideMap(){
+	select('#map').style('display',null)
 }
 
 function addPlaceFormTo(selector,placeData={}){
@@ -291,13 +308,3 @@ function currentAddressString(){
 		d.province, d.subnational_region, d.country ]
 	return addressFields.filter(v=>''!=v).join(', ')
 }
-
-
-/*
-	// make a map and add all layers
-	map = leafletMap('map')
-		.setView(defaultCenter,defaultMaxZoom)
-	selectionLayer.addTo(map)
-	responseLayer.addTo(map)
-	tileLayer(`${mbMap}?access_token=${mbToken}`).addTo(map)
-*/
