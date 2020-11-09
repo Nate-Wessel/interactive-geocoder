@@ -1,51 +1,17 @@
-CREATE TABLE places2 (
-	geo_id serial PRIMARY KEY,
-	country text,
-	subnational_region text,
-	province text,
-	metro text,
-	county text,
-	city text,
-	district text,
-	unique(
-		country, subnational_region,
-		province, metro, county, 
-		city, district
-	),
-	osm_id bigint UNIQUE,
-	osm_id_type text, -- one of 'point','boundary'
-	point geometry(Point,4326),
-	polygon geometry(MultiPolygon,4326),
-	notes text
+CREATE TABLE jurisdiction_types (
+	uid serial PRIMARY KEY,
+	"label" text UNIQUE
 );
 
-CREATE OR REPLACE VIEW places_addr AS 
-SELECT 
-	geo_id,
-	concat_ws(', ',
-		district, 
-		city, 
-		county, 
-		metro, 
-		province, 
-		subnational_region, 
-		country
-	) AS addr
-FROM places;
-
-CREATE OR REPLACE VIEW places_form AS 
-SELECT 
-	geo_id,
-	country,
-	subnational_region,
-	province, 
-	metro,
-	county, 
-	city,
-	district, 
-	osm_id,
-	osm_id_type,
-	notes,
-	ST_AsGeoJSON(point,5) AS point_geojson,
-	ST_AsGeoJSON(polygon,5) AS polygon_geojson
-FROM places;
+CREATE TABLE jurisdictions (
+	uid serial PRIMARY KEY,
+	name text,
+	jurisdiction_type int REFERENCES jurisdiction_types (uid),
+	parent int REFERENCES jurisdictions (uid),
+	osm_id bigint UNIQUE,
+	point geometry(POINT,4326),
+	full_polygon geometry(MULTIPOLYGON,4326),
+	land_polygon geometry(MULTIPOLYGON,4326),
+	notes text,
+	UNIQUE (name, parent)
+);
