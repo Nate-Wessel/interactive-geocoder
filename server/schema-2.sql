@@ -8,7 +8,7 @@ CREATE TABLE jurisdictions (
 	name text,
 	jurisdiction_type int REFERENCES jurisdiction_types (uid),
 	parent int REFERENCES jurisdictions (uid),
-	osm_id bigint,
+	osm_id bigint UNIQUE,
 	point geometry(POINT,4326),
 	full_polygon geometry(MULTIPOLYGON,4326),
 	land_polygon geometry(MULTIPOLYGON,4326),
