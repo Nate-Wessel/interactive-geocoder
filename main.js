@@ -15,7 +15,6 @@ const mbMap =   'https://api.mapbox.com/styles/v1/apfcanada/'+
 const mbToken = 'pk.eyJ1IjoiYXBmY2FuYWRhIiwiYSI6ImNrY3hpdzcwbz'+
                 'AwZzIydms3NGRtZzY2eXIifQ.E7PbT0YGmjJjLiLmyRWSuw'
 
-const defaultCenter = [43.67,-79.38] // toronto
 const defaultMaxZoom = 13
 
 var map
@@ -46,34 +45,15 @@ const textInputFields = [
 ]
 
 window.onload = ()=>{
-	// add actions
-	select('input[name="search"]')
+	// set up search bar
+	select('.search input')
 		.on('input focus',search)
-		.on('unfocus',hideResults)
-	select('#controls button#update').on('click',geocode)
-	select('#controls button#save').on('click',save)
-	select('#controls button#next').on('click',()=>fetchPlace())
-	// make a map and add all layers
+		.on('unfocus',clearResults)
+	// initialize the map
 	map = leafletMap('map')
-		.setView(defaultCenter,defaultMaxZoom)
-		.on('click drag',hideResults)
-	selectionLayer.addTo(map)
 	responseLayer.addTo(map)
+	selectionLayer.addTo(map)
 	tileLayer(`${mbMap}?access_token=${mbToken}`).addTo(map)
-	// create text input fields
-	let inputContainers = select('#text-inputs').selectAll('div')
-		.data(textInputFields).join('div')
-		.classed('input-container empty',true)
-	inputContainers.append('input').attr('type','text')
-		.attr('name',d=>d.name)
-		.attr('readonly',d=>'readonly' in d ? 'true' : null )
-	inputContainers.append('label').attr('for',d=>d.name).text(d=>d.label)
-	inputContainers
-		.selectAll('input')
-		.on('unfocus change',(event)=>{
-			select(event.target.parentNode)
-				.classed('empty',event.target.value.trim()=='')
-		})	
 }
 
 function search(event){
@@ -83,23 +63,119 @@ function search(event){
 	// is this a search by name or geo_id?
 	if(!isNaN(searchTerm) & Number(searchTerm) > 0){
 		resource = `${server}/suggester.php?geo_id=${Number(searchTerm)}`
-	}else if(searchTerm.trim().length > 2){
+	}else if(searchTerm.trim().length >= 2){
 		resource = `${server}/suggester.php?addr=${searchTerm}`
+	}else{ 
+		return clearResults();
 	}
-	if(!resource){ return hideResults(); }
 	json(resource).then( response => {
-		select('ol#results').selectAll('li')
-			.data(response,d=>d.geo_id)
-			.join('li').classed('own-search',true).text(d=>d.addr)
-			.on('click',event => {
-				fetchPlace( select(event.target).datum().geo_id) 
-				hideResults()
-			} )	
+		showPlaceResults(response,event.target) 
 	} )
 }
 
-function hideResults(){
-	selectAll('ol#results li').remove()
+function showPlaceResults(results,searchBar){
+	// append results list right after search bar
+	let resultsList = select(searchBar.parentNode)
+		.selectAll('ol.results')
+		.data([results]).join('ol').classed('results',true)
+	resultsList.selectAll('li')
+		.data(d=>d,d=>d.geo_id)
+		.join('li').classed('own-search',true).text(d=>d.addr)
+		.on('click',event => {
+			select('.search input').property('value','')
+			clearResults()
+			showExistingPlace( select(event.target).datum().geo_id)
+		} )
+	// display "new place" button 
+	resultsList
+		.selectAll('li#new-place')
+		.data([{'id':'1'}]).join('li').attr('id','new-place')
+		.append('button')
+		.on('click',newPlaceForm)
+		.text('New Place')
+}
+
+function newPlaceForm(){
+	clearResults()
+	addPlaceFormTo('body',{geo_id:'A new value will be assigned'})
+}
+
+function showExistingPlace(geo_id){
+	// fetch the data
+	let URL = `${server}/get-place.php${isNaN(geo_id)?'':'?geo_id='+geo_id}`
+	json(URL).then( response => {
+		addPlaceFormTo('body',response)
+		if(response.point_geojson){ // if not null
+			showMap(response.point_geojson)
+		}else{
+			hideMap()
+		}
+	} )
+}
+
+function showMap(geojson){
+	responseLayer.clearLayers().addData( geojson )
+	select('#map').style('display','block')
+	map.fitBounds( 
+		selectionLayer
+			.getBounds()
+			.extend(responseLayer.getBounds()), 
+		{maxZoom:defaultMaxZoom} )
+	
+}
+
+function hideMap(){
+	select('#map').style('display',null)
+}
+
+function addPlaceFormTo(selector,placeData={}){
+	select(selector)
+		.selectAll('form.place')
+		.data([textInputFields]).join('form').classed('place',true)
+		.selectAll('div.input-container')
+		.data(d=>d,d=>d.name)
+		.join(
+			enter => {
+				let container = enter.append('div')
+					.classed('input-container',true)
+				container.append('input')
+					.attr('type','text')
+					.attr('name',d=>d.name)
+					.attr('readonly',d=>'readonly' in d ? 'true' : null )
+					.on('unfocus change',checkIfEmpty)
+					.property('value',d => {
+						return (d.name in placeData) ? placeData[d.name] : ''
+					} )
+					.dispatch('change')
+					.on('input',checkIfDifferent)
+				container.append('label')
+					.attr('for',d=>d.name)
+					.text(d=>d.label)
+			},
+			update => { 
+				update.select('input') 
+					.property('value',d => {
+						return (d.name in placeData) ? placeData[d.name] : ''
+					} )
+					.dispatch('change')
+			}
+		)
+	function checkIfEmpty(event){
+		select(event.target.parentNode)
+			.classed('empty',event.target.value.trim()=='')
+	}
+	function checkIfDifferent(event){
+		// check current form value against original value from DB
+		let field = select(event.target).attr('name')
+		let orig = (field in placeData && placeData[field]) ? placeData[field] : ''
+		let curr = event.target.value.trim()
+		select(event.target)
+			.style('background-color',curr != orig ? 'pink' : null)
+	}
+}
+
+function clearResults(){
+	select('.search .results').remove()
 }
 
 function setFormData(newData){
@@ -117,13 +193,6 @@ function setFormData(newData){
 		selectionLayer.addData(newData.polygon_geojson)
 	}
 	map.fitBounds( selectionLayer.getBounds(), {maxZoom:defaultMaxZoom} )
-}
-
-function fetchPlace(geo_id){
-	let URL = `${server}/get-place.php`
-	if( !isNaN(geo_id) ) URL += `?geo_id=${geo_id}`;
-	// fetch data from server
-	json(URL).then( response => setFormData(response) )
 }
 
 function currentFormData(){
@@ -239,4 +308,3 @@ function currentAddressString(){
 		d.province, d.subnational_region, d.country ]
 	return addressFields.filter(v=>''!=v).join(', ')
 }
-

@@ -14536,12 +14536,6 @@ function select(selector) {
       : new Selection([[selector]], root);
 }
 
-function selectAll(selector) {
-  return typeof selector === "string"
-      ? new Selection([document.querySelectorAll(selector)], [document.documentElement])
-      : new Selection([selector == null ? [] : array(selector)], root);
-}
-
 var noop = {value: () => {}};
 
 function dispatch() {
@@ -16234,7 +16228,6 @@ const mbMap =   'https://api.mapbox.com/styles/v1/apfcanada/'+
 const mbToken = 'pk.eyJ1IjoiYXBmY2FuYWRhIiwiYSI6ImNrY3hpdzcwbz'+
                 'AwZzIydms3NGRtZzY2eXIifQ.E7PbT0YGmjJjLiLmyRWSuw';
 
-const defaultCenter = [43.67,-79.38]; // toronto
 const defaultMaxZoom = 13;
 
 var map;
@@ -16265,34 +16258,15 @@ const textInputFields = [
 ];
 
 window.onload = ()=>{
-	// add actions
-	select('input[name="search"]')
+	// set up search bar
+	select('.search input')
 		.on('input focus',search)
-		.on('unfocus',hideResults);
-	select('#controls button#update').on('click',geocode);
-	select('#controls button#save').on('click',save);
-	select('#controls button#next').on('click',()=>fetchPlace());
-	// make a map and add all layers
-	map = createMap('map')
-		.setView(defaultCenter,defaultMaxZoom)
-		.on('click drag',hideResults);
-	selectionLayer.addTo(map);
+		.on('unfocus',clearResults);
+	// initialize the map
+	map = createMap('map');
 	responseLayer.addTo(map);
+	selectionLayer.addTo(map);
 	tileLayer(`${mbMap}?access_token=${mbToken}`).addTo(map);
-	// create text input fields
-	let inputContainers = select('#text-inputs').selectAll('div')
-		.data(textInputFields).join('div')
-		.classed('input-container empty',true);
-	inputContainers.append('input').attr('type','text')
-		.attr('name',d=>d.name)
-		.attr('readonly',d=>'readonly' in d ? 'true' : null );
-	inputContainers.append('label').attr('for',d=>d.name).text(d=>d.label);
-	inputContainers
-		.selectAll('input')
-		.on('unfocus change',(event)=>{
-			select(event.target.parentNode)
-				.classed('empty',event.target.value.trim()=='');
-		});	
 };
 
 function search(event){
@@ -16302,159 +16276,117 @@ function search(event){
 	// is this a search by name or geo_id?
 	if(!isNaN(searchTerm) & Number(searchTerm) > 0){
 		resource = `${server}/suggester.php?geo_id=${Number(searchTerm)}`;
-	}else if(searchTerm.trim().length > 2){
+	}else if(searchTerm.trim().length >= 2){
 		resource = `${server}/suggester.php?addr=${searchTerm}`;
+	}else { 
+		return clearResults();
 	}
-	if(!resource){ return hideResults(); }
 	json(resource).then( response => {
-		select('ol#results').selectAll('li')
-			.data(response,d=>d.geo_id)
-			.join('li').classed('own-search',true).text(d=>d.addr)
-			.on('click',event => {
-				fetchPlace( select(event.target).datum().geo_id); 
-				hideResults();
-			} );	
+		showPlaceResults(response,event.target); 
 	} );
 }
 
-function hideResults(){
-	selectAll('ol#results li').remove();
-}
-
-function setFormData(newData){
-	// iterate over data object setting corresponding form elements
-	for( let [ key, value ] of Object.entries(newData)){
-		select(`input[name="${key}"]`)
-			.property('value', value ? value : '')
-			.dispatch('change');
-	}
-	selectionLayer.clearLayers();
-	if('point_geojson' in newData && newData.point_geojson){
-		selectionLayer.addData(newData.point_geojson);
-	}
-	if('polygon_geojson' in newData && newData.polygon_geojson){
-		selectionLayer.addData(newData.polygon_geojson);
-	}
-	map.fitBounds( selectionLayer.getBounds(), {maxZoom:defaultMaxZoom} );
-}
-
-function fetchPlace(geo_id){
-	let URL = `${server}/get-place.php`;
-	if( !isNaN(geo_id) ) URL += `?geo_id=${geo_id}`;
-	// fetch data from server
-	json(URL).then( response => setFormData(response) );
-}
-
-function currentFormData(){
-	let data = {};
-	selectAll('#text-inputs input').each(function(){
-		let key = select(this).property('name');
-		let val = select(this).property('value').trim();
-		data[key] = val == '' ? null : val;
-	} );
-	return data
-}
-
-function save(){
-	let options = {
-		method:'POST',
-		body: JSON.stringify( currentFormData() ),
-		headers: { 'Content-Type': 'application/json' } 
-	};
-	json(`${server}/update.php`, options )
-		.then( response => {
-			// give feedback on updated form fields
-			for( [key,val] of Object.entries(response.updated)){
-				console.log(key,val);
-				select(`#text-inputs input[name="${key}"]`)
-					.style('background-color',val?'green':'red')
-					.transition().duration(2000)
-					.style('background-color',null);
-			}
+function showPlaceResults(results,searchBar){
+	// append results list right after search bar
+	let resultsList = select(searchBar.parentNode)
+		.selectAll('ol.results')
+		.data([results]).join('ol').classed('results',true);
+	resultsList.selectAll('li')
+		.data(d=>d,d=>d.geo_id)
+		.join('li').classed('own-search',true).text(d=>d.addr)
+		.on('click',event => {
+			select('.search input').property('value','');
+			clearResults();
+			showExistingPlace( select(event.target).datum().geo_id);
 		} );
+	// display "new place" button 
+	resultsList
+		.selectAll('li#new-place')
+		.data([{'id':'1'}]).join('li').attr('id','new-place')
+		.append('button')
+		.on('click',newPlaceForm)
+		.text('New Place');
 }
 
-const nominatimData = {};
-function geocode(){
-	// geocode with Nominatim
-	let params = new URLSearchParams( {
-		'q': currentAddressString(), 'format': 'json', 'polygon_geojson': 1,
-		'matchquality': 1, 'namedetails': 1, 'addressdetails': 1, 'extratags': 1
-	} );
-	let URL = `https://nominatim.openstreetmap.org/search?${params.toString()}`;	
-	if( URL in nominatimData ){ // this exact request has already been made
-		return showResults(nominatimData[URL])
-	}
-	// or else this is a new request in this session
+function newPlaceForm(){
+	clearResults();
+	addPlaceFormTo('body',{geo_id:'A new value will be assigned'});
+}
+
+function showExistingPlace(geo_id){
+	// fetch the data
+	let URL = `${server}/get-place.php${isNaN(geo_id)?'':'?geo_id='+geo_id}`;
 	json(URL).then( response => {
-		showResults(response);
-		nominatimData[URL] = response;
+		addPlaceFormTo('body',response);
+		if(response.point_geojson){ // if not null
+			showMap(response.point_geojson);
+		}else {
+			hideMap();
+		}
 	} );
-	function showResults(response){
-		select('ol#results')
-			.selectAll('li')
-			.data(response,d=>d.display_name)
-			.join('li').text(d=>d.display_name)
-			.classed('nominatim-search',true)
-			.on('click',showGeoResult);
-	} 
 }
 
-function showGeoResult(event){
-	let data = select(event.target).datum();
-	console.log(data);
-	// add spatial data to the map
-	responseLayer
-		.clearLayers()
-		.addData( data.geojson );
-	// if response is a polygon, ad the center point too
-	if(data.geojson.type='Polygon'){
-		responseLayer
-			.addData( {type:'Point',coordinates:[data.lon,data.lat]} );
-	}
+function showMap(geojson){
+	responseLayer.clearLayers().addData( geojson );
+	select('#map').style('display','block');
 	map.fitBounds( 
 		selectionLayer
 			.getBounds()
 			.extend(responseLayer.getBounds()), 
 		{maxZoom:defaultMaxZoom} );
-	// add textual data to the div
-	let div = select('#selected-match');
-	div.selectAll('p,h3,h4').remove();
-	// append info
-	div.append('h3')
-		.text(data.namedetails.name);
-	// get other names 
-	let translations = new Set();
-	if('name:en' in data.namedetails){ 
-		translations.add(data.namedetails['name:en']); 
+	
+}
+
+function hideMap(){
+	select('#map').style('display',null);
+}
+
+function addPlaceFormTo(selector,placeData={}){
+	select(selector)
+		.selectAll('form.place')
+		.data([textInputFields]).join('form').classed('place',true)
+		.selectAll('div.input-container')
+		.data(d=>d,d=>d.name)
+		.join(
+			enter => {
+				let container = enter.append('div')
+					.classed('input-container',true);
+				container.append('input')
+					.attr('type','text')
+					.attr('name',d=>d.name)
+					.attr('readonly',d=>'readonly' in d ? 'true' : null )
+					.on('unfocus change',checkIfEmpty)
+					.property('value',d => {
+						return (d.name in placeData) ? placeData[d.name] : ''
+					} )
+					.dispatch('change')
+					.on('input',checkIfDifferent);
+				container.append('label')
+					.attr('for',d=>d.name)
+					.text(d=>d.label);
+			},
+			update => { 
+				update.select('input') 
+					.property('value',d => {
+						return (d.name in placeData) ? placeData[d.name] : ''
+					} )
+					.dispatch('change');
+			}
+		);
+	function checkIfEmpty(event){
+		select(event.target.parentNode)
+			.classed('empty',event.target.value.trim()=='');
 	}
-	if('name:fr' in data.namedetails){ 
-		translations.add(data.namedetails['name:fr']); 
-	}
-	translations.delete(data.namedetails.name);
-	if(translations.size > 0){
-		div.append('p').text(`(${[...translations].join(' | ')})`);
-	}
-	// link to OSM
-	let osmLink = `https://www.openstreetmap.org/${data.osm_type}/${data.osm_id}`;
-	div.append('p').append('a').attr('href',osmLink).attr('target','_blank')
-		.text(`OSM ${data.osm_type}`);
-	// wikipedia
-	if('wikipedia' in data.extratags){
-		let enPage = 'wikipedia:en' in data.extratags ? 
-			data.extratags['wikipedia:en'] : data.extratags.wikipedia;
-		let wikiLink = `https://en.wikipedia.org/wiki/${enPage}`;
-		div.append('p').append('a').attr('href',wikiLink).attr('target','_blank')
-			.text(enPage);
+	function checkIfDifferent(event){
+		// check current form value against original value from DB
+		let field = select(event.target).attr('name');
+		let orig = (field in placeData && placeData[field]) ? placeData[field] : '';
+		let curr = event.target.value.trim();
+		select(event.target)
+			.style('background-color',curr != orig ? 'pink' : null);
 	}
 }
 
-function currentAddressString(){
-	// use the available data to make an address query string
-	// e.g. "Toronto, Ontario, Canada"
-	let d = currentFormData();
-	let addressFields = [ 
-		d.district, d.city, d.county, d.metro,
-		d.province, d.subnational_region, d.country ];
-	return addressFields.filter(v=>''!=v).join(', ')
+function clearResults(){
+	select('.search .results').remove();
 }

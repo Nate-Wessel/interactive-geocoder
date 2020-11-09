@@ -1,50 +1,81 @@
+@font-face {
+	font-family: 'Avenir';
+	src: url('fonts/Avenir-book.ttf');
+	font-weight: normal;
+	font-style: normal; }
+@font-face {
+	font-family: 'Avenir';
+	src: url('fonts/Avenir-oblique.ttf');
+	font-weight: normal;
+	font-style: italic; }
+@font-face {
+	font-family: 'Avenir';
+	src: url('fonts/Avenir-bold.ttf');
+	font-weight: bold;
+	font-style: normal; }
+	
 :root {
+	--bg: #f9f9f9;
+	--text: #2b2b2b;
+	--link: #176ba0;
+	--orange: #eabd3b;
 	--panel-width: 270px;
 	--panel-padding: 10px;
 	--panel-bg: #eee; }
+	
+::selection { background: var(--orange); }
+a { color: var(--link); text-decoration: none; }
+a:hover { text-decoration: underline; }
+a:visited { color: #7d3ac1; }
 
 html, body {
 	width: 100%;
-	height: 100%; 
-	margin: 0;
-	padding: 0; }
-	
-#controls {
-	position: absolute;
-	height: calc(100% - 2 * var(--panel-padding));
-	width: var(--panel-width);
-	right: 0px;
-	padding: var(--panel-padding);  
-	background: var(--panel-bg);
-	border-left: 2px solid grey;
-	z-index: 999; }
-#map {
-	position: absolute;
 	height: 100%;
-	width: calc(100% - var(--panel-width)); }
+	margin: 0;
+	padding: 0;
+	font-family: 'Avenir';
+	color: var(--text);
+	background-color: var(--bg);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-wrap: wrap; }
 
-button {
-	display: block;
-	width: 100%;
-	margin-bottom: 7px; }
+.search input {
+	min-width: 300px;
+	max-width: 100%;
+	font-size: 1.8em;
+	padding: 20px;
+	border: none;
+	background-color: #ececec; }
+.search .results {
+	list-style: none;
+	padding: 0; }
+.search .results li {
+	padding: 8px; }
+.search .results li:hover {
+	background-color: var(--orange); }
 
-#text-inputs {
+form {
+	max-width: 300px;
 	display: flex;
 	flex-direction: column; }
-.input-container {
+form .input-container {
 	width: 100%;
 	display: flex;
 	flex-direction: row;
-	align-items: center; }
-.input-container label { 
-	white-space: nowrap;
-	margin-right: 10px; }
-.input-container input {
-	flex: 2;
-	min-width: 10px; }
-#text-inputs .input-container.empty { 
+	align-items: center;
+	order: 0; }
+form .input-container.empty { 
 	order: 1; } /*throw empty inputs to the bottom*/
-#text-inputs .input-container.empty input { 
+form .input-container label { 
+	white-space: nowrap;
+	margin-left: 10px; }
+form .input-container input {
+	flex: 2;
+	min-width: 50px; }
+
+form .input-container.empty input { 
 	display: block; } 
 input {
 	margin: 3px; 
@@ -54,8 +85,29 @@ input {
 	border-radius: 4px;
 	padding: 2px; }
 input:read-only {
-	background: yellow; }
- 
+	background: var(--orange); }
+
+#map {
+	display: none;
+	height: 500px;
+	width: 400px; }
+
+
+
+button {
+	display: block;
+	width: 100%;
+	margin-bottom: 7px; }
+
+#controls {
+	position: absolute;
+	height: calc(100% - 2 * var(--panel-padding));
+	width: var(--panel-width);
+	right: 0px;
+	padding: var(--panel-padding);  
+	background: var(--panel-bg);
+	border-left: 2px solid grey;
+	z-index: 999; }
 	
 #results {
 	position: absolute;
