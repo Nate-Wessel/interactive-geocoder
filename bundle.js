@@ -16228,8 +16228,6 @@ const mbMap =   'https://api.mapbox.com/styles/v1/apfcanada/'+
 const mbToken = 'pk.eyJ1IjoiYXBmY2FuYWRhIiwiYSI6ImNrY3hpdzcwbz'+
                 'AwZzIydms3NGRtZzY2eXIifQ.E7PbT0YGmjJjLiLmyRWSuw';
 
-const defaultMaxZoom = 13;
-
 var map;
 const responseLayer = geoJSON( undefined, {
 	'style': { color: 'red' },
@@ -16244,24 +16242,11 @@ const selectionLayer = geoJSON( undefined, {
 	}
 } );
 
-const textInputFields = [
-	{'name':'geo_id','label':'geo_id','readonly':true},
-	{'name':'country','label':'Country'},
-	{'name':'subnational_region','label':'Subnational Region'},
-	{'name':'province','label':'Province/State'},
-	{'name':'metro','label':'Metro Area'},
-	{'name':'county','label':'County'},
-	{'name':'city','label':'City'},
-	{'name':'district','label':'Suburb/District'},
-	{'name':'osm_id','label':'OSM ID'},
-	{'name':'notes','label':'Notes'}
-];
-
 window.onload = ()=>{
 	// set up search bar
 	select('.search input')
 		.on('input focus',search)
-		.on('unfocus',clearResults);
+		.on('unfocus',clearSearchResults);
 	// initialize the map
 	map = createMap('map');
 	responseLayer.addTo(map);
@@ -16271,22 +16256,22 @@ window.onload = ()=>{
 
 function search(event){
 	// handles input/changes to the search parameters
-	var resource = null;
+	var query = null;
 	let searchTerm = event.target.value;
 	// is this a search by name or geo_id?
 	if(!isNaN(searchTerm) & Number(searchTerm) > 0){
-		resource = `${server}/suggester.php?geo_id=${Number(searchTerm)}`;
+		query = `geo_id=${Number(searchTerm)}`;
 	}else if(searchTerm.trim().length >= 2){
-		resource = `${server}/suggester.php?name=${searchTerm}`;
+		query = `name=${searchTerm}`;
 	}else { 
-		return clearResults();
+		return clearSearchResults();
 	}
-	json(resource).then( response => {
-		showPlaceResults(response,event.target); 
+	json(`${server}/suggester.php?${query}`).then( response => {
+		showSearchResults(response,event.target); 
 	} );
 }
 
-function showPlaceResults(results,searchBar){
+function showSearchResults(results,searchBar){
 	// append results list right after search bar
 	let resultsList = select(searchBar.parentNode)
 		.selectAll('ol.results')
@@ -16296,97 +16281,47 @@ function showPlaceResults(results,searchBar){
 		.join('li').classed('own-search',true).text(d=>d.addr)
 		.on('click',event => {
 			select('.search input').property('value','');
-			clearResults();
-			showExistingPlace( select(event.target).datum().geo_id);
+			clearSearchResults();
+			showPlace( select(event.target).datum().geo_id);
 		} );
-	// display "new place" button 
-	resultsList
-		.selectAll('li#new-place')
-		.data([{'id':'1'}]).join('li').attr('id','new-place')
-		.append('button')
-		.on('click',newPlaceForm)
-		.text('New Place');
 }
 
-function newPlaceForm(){
-	clearResults();
-	addPlaceFormTo('body',{geo_id:'A new value will be assigned'});
-}
-
-function showExistingPlace(geo_id){
-	// fetch the data
-	let URL = `${server}/get-place.php${isNaN(geo_id)?'':'?geo_id='+geo_id}`;
-	json(URL).then( response => {
-		addPlaceFormTo('body',response);
-		if(response.point_geojson){ // if not null
-			showMap(response.point_geojson);
-		}else {
-			hideMap();
-		}
-	} );
-}
-
-function showMap(geojson){
-	responseLayer.clearLayers().addData( geojson );
-	select('#map').style('display','block');
-	map.fitBounds( 
-		selectionLayer
-			.getBounds()
-			.extend(responseLayer.getBounds()), 
-		{maxZoom:defaultMaxZoom} );
-	
-}
-
-function hideMap(){
-	select('#map').style('display',null);
-}
-
-function addPlaceFormTo(selector,placeData={}){
-	select(selector)
-		.selectAll('form.place')
-		.data([textInputFields]).join('form').classed('place',true)
-		.selectAll('div.input-container')
-		.data(d=>d,d=>d.name)
-		.join(
-			enter => {
-				let container = enter.append('div')
-					.classed('input-container',true);
-				container.append('input')
-					.attr('type','text')
-					.attr('name',d=>d.name)
-					.attr('readonly',d=>'readonly' in d ? 'true' : null )
-					.on('unfocus change',checkIfEmpty)
-					.property('value',d => {
-						return (d.name in placeData) ? placeData[d.name] : ''
-					} )
-					.dispatch('change')
-					.on('input',checkIfDifferent);
-				container.append('label')
-					.attr('for',d=>d.name)
-					.text(d=>d.label);
-			},
-			update => { 
-				update.select('input') 
-					.property('value',d => {
-						return (d.name in placeData) ? placeData[d.name] : ''
-					} )
-					.dispatch('change');
-			}
-		);
-	function checkIfEmpty(event){
-		select(event.target.parentNode)
-			.classed('empty',event.target.value.trim()=='');
-	}
-	function checkIfDifferent(event){
-		// check current form value against original value from DB
-		let field = select(event.target).attr('name');
-		let orig = (field in placeData && placeData[field]) ? placeData[field] : '';
-		let curr = event.target.value.trim();
-		select(event.target)
-			.style('background-color',curr != orig ? 'pink' : null);
-	}
-}
-
-function clearResults(){
+function clearSearchResults(){
 	select('.search .results').remove();
+}
+
+function showPlace(geo_id){
+	if( isNaN(geo_id) ){ 
+		return console.warn('not a valid geo_id')
+	}
+	json(`${server}/get-place.php?geo_id=${geo_id}`).then( response => {
+		let div = select('#place-meta');
+		div.selectChildren().remove();
+		// start adding data
+		let form = div.append('form');
+		let container = form.append('div').classed('input-container',true);
+		container.append('input')
+			.attr('type','text')
+			.attr('name','geo_id')
+			.attr('readonly',true)
+			.property('value',geo_id);
+		container.append('label')
+			.attr('for','geo_id')
+			.text('geo_id');
+		container = form.append('div').classed('input-container',true);
+		container.append('input')
+			.attr('type','text')
+			.attr('name','name')
+			.property('value',response.name);
+		container.append('label')
+			.attr('for','name')
+			.text('Name');
+		container = form.append('div').classed('input-container',true);
+		let selector = container.append('select');
+		selector.append('option').text('123');
+		selector.append('option').text('city');
+		container.append('label')
+			.attr('for','type')
+			.text('Type');
+	} );
 }
