@@ -84,12 +84,12 @@ function showPlace(geo_id){
 	if( isNaN(geo_id) ){ 
 		return console.warn('not a valid geo_id')
 	}
-	json(`${server}/jurisdiction.php?geo_id=${geo_id}`).then( response => {
-		let div = select('#place-meta')
-		div.selectChildren().remove()
-		// start adding data
-		let form = div.append('form')
-		let container = form.append('div').classed('input-container',true)
+	let div = select('#place-meta')
+	div.selectChildren().remove()
+	let form = div.append('form')
+	json(`${server}/jurisdiction.php?geo_id=${geo_id}`).then( jurisdiction => {	
+		let container = form.append('div')
+			.classed('input-container',true)
 		container.append('input')
 			.attr('type','text')
 			.attr('name','geo_id')
@@ -102,17 +102,23 @@ function showPlace(geo_id){
 		container.append('input')
 			.attr('type','text')
 			.attr('name','name')
-			.property('value',response.name)
+			.property('value',jurisdiction.name)
 		container.append('label')
 			.attr('for','name')
 			.text('Name')
-		container = form.append('div').classed('input-container',true)
-		let selector = container.append('select')
-		selector.append('option').text('123')
-		selector.append('option').text('city')
-		container.append('label')
-			.attr('for','type')
-			.text('Type')
+		json(`${server}/jurisdiction.php?types`).then( types => {
+			container = form.append('div').classed('input-container',true)
+			let selector = container
+				.append('select')
+				.selectAll('option')
+				.data(types)
+				.join('option')
+				.attr('selected',t => jurisdiction.type_of == t.label ? true : null )
+				.text(d=>d.label)
+			container.append('label')
+				.attr('for','type')
+				.text('Type')
+		} )
 	} )
 }
 
