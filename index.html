@@ -15,7 +15,29 @@
 				autocomplete="off"/>
 		</div> <!--.search-->
 		
-		<div id="place-meta"></div>
+		<div id="place-meta">
+			<ol id="parents"></ol>
+			<form>
+				<div class="input-container">
+					<input id="geo_id" type="text" placeholder="unassigned" readonly/>
+					<label for="geo_id">geo_id</label>
+				</div>
+				<div class="input-container">
+					<input id="name" type="text"/>
+					<label for="name">Name</label>
+				</div>
+				<div class="input-container">
+					<select id="type">
+						<option>type not available</option>
+					</select>
+					<label for="type">Type</label>
+				</div>
+			</form>
+			<ul id="children">
+				<li>child not available</li>
+			</ul><!--#children-->
+			<button id="add-child">Add Child Jurisdiction</button>
+		</div><!--#place-meta-->
 		
 		<div id="map"></div>
 	</body>
