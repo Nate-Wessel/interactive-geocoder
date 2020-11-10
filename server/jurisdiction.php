@@ -13,6 +13,8 @@ switch($_SERVER['REQUEST_METHOD']){
 			$response = getRecord($_GET['geo_id']);
 		}else if(array_key_exists('search',$_GET)){
 			$response = getRecords($_GET['search']);
+		}else if(array_key_exists('parent',$_GET)){
+			$response = getChildrenOf($_GET['parent']);
 		}else if(array_key_exists('types',$_GET)){
 			$response = getTypes();
 		}
@@ -59,6 +61,20 @@ function getRecords($searchTerm){
 		array_push($searchResults,getRecord($record->geo_id));
 	}
 	return $searchResults;
+}
+
+function getChildrenOf($geo_id){
+	$geo_id = pg_escape_literal($geo_id);
+	$query = "
+		SELECT geo_id 
+		FROM jurisdictions 
+		WHERE parent = {$geo_id}";
+	$results = pg_query($query);
+	$children = [];
+	while($record = pg_fetch_object($results)){
+		array_push($children,getRecord($record->geo_id));
+	}
+	return $children;
 }
 
 function getTypes(){
