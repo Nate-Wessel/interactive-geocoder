@@ -16277,7 +16277,7 @@ function search(event){
 	if(!isNaN(searchTerm) & Number(searchTerm) > 0){
 		resource = `${server}/suggester.php?geo_id=${Number(searchTerm)}`;
 	}else if(searchTerm.trim().length >= 2){
-		resource = `${server}/suggester.php?addr=${searchTerm}`;
+		resource = `${server}/suggester.php?name=${searchTerm}`;
 	}else { 
 		return clearResults();
 	}
