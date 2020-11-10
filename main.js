@@ -51,11 +51,11 @@ function search(event){
 	if(!isNaN(searchTerm) & Number(searchTerm) > 0){
 		query = `geo_id=${Number(searchTerm)}`
 	}else if(searchTerm.trim().length >= 2){
-		query = `name=${searchTerm}`
+		query = `search=${searchTerm}`
 	}else{ 
 		return clearSearchResults();
 	}
-	json(`${server}/suggester.php?${query}`).then( response => {
+	json(`${server}/jurisdiction.php?${query}`).then( response => {
 		showSearchResults(response,event.target) 
 	} )
 }
@@ -67,7 +67,8 @@ function showSearchResults(results,searchBar){
 		.data([results]).join('ol').classed('results',true)
 	resultsList.selectAll('li')
 		.data(d=>d,d=>d.geo_id)
-		.join('li').classed('own-search',true).text(d=>d.addr)
+		.join('li').classed('own-search',true)
+		.text(d=>`${d.name} (${d.type_of} ${d.parent?'in '+d.parent.name:''})`)
 		.on('click',event => {
 			select('.search input').property('value','')
 			clearSearchResults()
@@ -83,7 +84,7 @@ function showPlace(geo_id){
 	if( isNaN(geo_id) ){ 
 		return console.warn('not a valid geo_id')
 	}
-	json(`${server}/get-place.php?geo_id=${geo_id}`).then( response => {
+	json(`${server}/jurisdiction.php?geo_id=${geo_id}`).then( response => {
 		let div = select('#place-meta')
 		div.selectChildren().remove()
 		// start adding data
