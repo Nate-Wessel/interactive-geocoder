@@ -19,6 +19,10 @@ switch($_SERVER['REQUEST_METHOD']){
 			$response = getTypes();
 		}
 		break;
+	case 'POST':
+		$postedData = json_decode(file_get_contents('php://input'),false);
+		$response = insertJurisdiction($postedData);
+		break;		
 	default: // TODO add support for POST, PATCH, DELETE
 		echo json_encode(['error'=>'method not yet supported']);
 		break;
@@ -27,6 +31,23 @@ echo json_encode($response,JSON_NUMERIC_CHECK);
 
 # close the connection
 pg_close($connection);
+
+function insertJurisdiction($data){
+	$name = pg_escape_literal($data->name);
+	$parent = pg_escape_literal($data->parent);
+	$jurisdiction_type = pg_escape_literal($data->jurisdiction_type);
+	$osm_id = pg_escape_literal($data->osm_id);
+	$success = pg_query("
+		INSERT INTO jurisdictions ( name, parent, jurisdiction_type, osm_id ) 
+		VALUES ( $name, $parent, $jurisdiction_type, $osm_id )");
+	if($success){
+		$result = pg_query("Select geo_id WHERE name=$name AND parent=$parent;");
+		return getRecord(pg_fetch_result($result));
+	}else{
+		return pg_last_error();
+	}
+	
+}
 
 function getRecord($geo_id){
 	$geo_id = pg_escape_literal($geo_id);
