@@ -1,5 +1,5 @@
 <?php 
-// handles requests, updates, and additions to jurisdictions
+// CRU(D) jurisdictions
 
 # connect to DB
 require 'config.php';
@@ -21,18 +21,35 @@ switch($_SERVER['REQUEST_METHOD']){
 		break;
 	case 'POST':
 		$postedData = json_decode(file_get_contents('php://input'),false);
-		$response = insertJurisdiction($postedData);
-		break;		
+		$response = insertRecord($postedData);
+		break;
+	case 'PATCH':
+		$postedData = json_decode(file_get_contents('php://input'),false);
+		$response = updateRecord($postedData);
+		break;
 	default: // TODO add support for POST, PATCH, DELETE
 		echo json_encode(['error'=>'method not yet supported']);
 		break;
 }
+// returns JSON-formatted data for all methods
 echo json_encode($response,JSON_NUMERIC_CHECK);
 
 # close the connection
 pg_close($connection);
 
-function insertJurisdiction($data){
+function updateRecord($data){
+	$geo_id = pg_escape_literal($data->geo_id);
+	foreach($data as $key => $value){
+		$field = pg_escape_identifier($key);
+		$escapedValue = pg_escape_literal($value);
+		$query = "
+			UPDATE jurisdictions SET $field = $escapedValue
+			WHERE geo_id = $geo_id";
+	}
+	return getRecord($data->geo_id);
+}
+
+function insertRecord($data){
 	$name = pg_escape_literal($data->name);
 	$parent = pg_escape_literal($data->parent);
 	$jurisdiction_type = pg_escape_literal($data->jurisdiction_type);
