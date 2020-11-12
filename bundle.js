@@ -918,6 +918,7 @@ window.onload = ()=>{
 		.on('unfocus',clearSearchResults);
 	// populate place types
 	json(`${server}/jurisdiction.php?types`).then( types => {
+		types.unshift({label:'???'});
 		select('#place-meta form select#type')
 			.selectAll('option')
 			.data(types)
@@ -963,13 +964,15 @@ function clearSearchResults(){
 
 function showPlace(geo_id){
 	if( isNaN(geo_id) ){ 
-		return console.warn('not a valid geo_id')
+		return console.warn(geo_id,'is not a valid geo_id')
 	}
+	clearActions();
 	json(`${server}/jurisdiction.php?geo_id=${geo_id}`).then( jurisdiction => {
 		// set values from response
 		let form = select('#place-meta form');
 		form.select('input#geo_id').property('value',jurisdiction.geo_id);
 		form.select('input#name').property('value',jurisdiction.name);
+		form.select('input#osm_id').property('value',jurisdiction.osm_id);
 		form.select('select#type')
 			.selectAll('option')
 			.attr('selected',d => jurisdiction.type_of == d.label ? true : null);
@@ -983,7 +986,8 @@ function showPlace(geo_id){
 			.selectAll('li')
 			.data(parents.reverse())
 			.join('li')
-			.text(j=>`${j.name} (${j.type_of})`);
+			.text(j=>`${j.name} (${j.type_of})`)
+			.on('click',placeClicked);
 	} );
 	// get children
 	json(`${server}/jurisdiction.php?parent=${geo_id}`).then( children => {
@@ -991,6 +995,27 @@ function showPlace(geo_id){
 			.selectAll('li')
 			.data(children)
 			.join('li')
-			.text(j=> `${j.name} (${j.type_of})`);
+			.text(j=> `${j.name} (${j.type_of})`)
+			.on('click',placeClicked);
+		addAction(addChildForm,'Add child jurisdiction');
 	} );
+	function placeClicked(event,datum){
+		showPlace(datum.geo_id);
+	}
+}
+
+function addAction(action,label='NA'){
+	select('form #actions')
+		.append('input')
+		.attr('type','button')
+		.on('click',action)
+		.attr('value',label);
+}
+
+function clearActions(){
+	select('form #actions').selectAll('input').remove();
+}
+
+function addChildForm(parent_id){
+	console.log('should add empty form');
 }
