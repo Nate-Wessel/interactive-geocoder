@@ -899,6 +899,12 @@ function select(selector) {
       : new Selection([[selector]], root);
 }
 
+function selectAll(selector) {
+  return typeof selector === "string"
+      ? new Selection([document.querySelectorAll(selector)], [document.documentElement])
+      : new Selection([selector == null ? [] : array(selector)], root);
+}
+
 function responseJson(response) {
   if (!response.ok) throw new Error(response.status + " " + response.statusText);
   if (response.status === 204 || response.status === 205) return;
@@ -918,7 +924,7 @@ window.onload = ()=>{
 		.on('unfocus',clearSearchResults);
 	// populate place types
 	json(`${server}/jurisdiction.php?types`).then( types => {
-		types.unshift({label:'???'});
+		types.unshift({uid:0,label:'---'});
 		select('#place-meta form select#type')
 			.selectAll('option')
 			.data(types)
@@ -1017,5 +1023,15 @@ function clearActions(){
 }
 
 function addChildForm(parent_id){
+	clearActions();
+	let form = select('#place-meta form');
+	form.select('input#geo_id').property('value','will be assigned');
+	form.select('input#name').property('value','');
+	form.select('input#osm_id').property('value','');
+	form.select('select#type')
+		.selectAll('option')
+		.attr('selected',d => d.uid < 1 ? true : null);
+	
+	selectAll('form input[type="text"]').property('value',null);
 	console.log('should add empty form');
 }
