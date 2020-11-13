@@ -83,6 +83,9 @@ function showPlace(geo_id){
 	} )
 	// get children
 	json(`${server}/jurisdiction.php?parent=${geo_id}`).then( children => {
+		children
+			.sort((a,b)=>a.name.localeCompare(b.name))
+			.sort((a,b)=>a.type_of.localeCompare(b.type_of))
 		select('ul#children')
 			.selectAll('li')
 			.data(children)
