@@ -11,7 +11,7 @@ window.onload = ()=>{
 	// populate place types
 	json(`${server}/jurisdiction.php?types`).then( types => {
 		types.unshift({uid:0,label:'---'})
-		select('#place-meta form select#type')
+		select('#this-place form select#type')
 			.selectAll('option')
 			.data(types)
 			.join('option')
@@ -61,32 +61,46 @@ function showPlace(geo_id){
 	clearActions()
 	json(`${server}/jurisdiction.php?geo_id=${geo_id}`).then( jurisdiction => {
 		// set values from response
-		let form = select('#place-meta form')
+		let form = select('#this-place form')
 		form.select('input#geo_id').property('value',jurisdiction.geo_id)
 		form.select('input#name').property('value',jurisdiction.name)
 		form.select('input#osm_id').property('value',jurisdiction.osm_id)
 		form.select('select#type')
 			.selectAll('option')
 			.attr('selected',d => jurisdiction.type_of == d.label ? true : null)
-		// get parents and display
+		// show parents
 		let [ parents, this_jur ] = [ [], jurisdiction ]
 		while(this_jur.parent){
 			parents.push(this_jur.parent)
 			this_jur = this_jur.parent
 		}
-		select('ol#parents')
+		select('#parents ol')
 			.selectAll('li')
 			.data(parents.reverse())
 			.join('li')
 			.text(j=>`${j.name} (${j.type_of})`)
 			.on('click',placeClicked)
+		// get siblings
+		let parent_id = jurisdiction.parent ? jurisdiction.parent.geo_id : -1
+		json(`${server}/jurisdiction.php?parent=${parent_id}`)
+			.then( siblings => {
+				siblings
+					.sort((a,b)=>a.name.localeCompare(b.name))
+					.sort((a,b)=>a.type_of.localeCompare(b.type_of))
+				select('#siblings ul')
+					.selectAll('li')
+					.data(siblings.filter(s=>s.geo_id!=jurisdiction.geo_id))
+					.join('li')
+					.text(j=> `${j.name} (${j.type_of})`)
+					.on('click',placeClicked)
+			} )	
 	} )
-	// get children
+	// show children
 	json(`${server}/jurisdiction.php?parent=${geo_id}`).then( children => {
 		children
 			.sort((a,b)=>a.name.localeCompare(b.name))
 			.sort((a,b)=>a.type_of.localeCompare(b.type_of))
-		select('ul#children')
+		select('#children ul')
 			.selectAll('li')
 			.data(children)
 			.join('li')
@@ -113,7 +127,7 @@ function clearActions(){
 
 function addChildForm(parent_id){
 	clearActions()
-	let form = select('#place-meta form')
+	let form = select('#this-place form')
 	form.select('input#geo_id').property('value','will be assigned')
 	form.select('input#name').property('value','')
 	form.select('input#osm_id').property('value','')

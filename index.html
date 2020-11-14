@@ -9,14 +9,15 @@
 		<script src="bundle.js"></script>
 	</head>
 	<body>
+	
 		<div class="search">
 			<input type="text" 
 				placeholder="Search by name or geo_id"
 				autocomplete="off"/>
 		</div> <!--.search-->
-		
-		<div id="place-meta">
-			<ol id="parents"></ol>
+
+		<div id="this-place">
+			<h3>This Place</h3>
 			<form>
 				<div class="input-container">
 					<input id="geo_id" type="text" placeholder="unassigned" readonly/>
@@ -38,10 +39,22 @@
 				</div>
 				<div id="actions"><div>
 			</form>
-			<ul id="children">
-				<li>child not available</li>
-			</ul><!--#children-->
-		</div><!--#place-meta-->
+		</div>
+
+		<div id="parents">
+			<h3>Parents</h3>
+			<ol></ol>
+		</div>
+
+		<div id="children">
+			<h3>Children</h3>
+			<ul></ul>
+		</div>
+		
+		<div id="siblings">
+			<h3>Siblings</h3>
+			<ul></ul>
+		</div>
 		
 		<div id="map"></div>
 	</body>
