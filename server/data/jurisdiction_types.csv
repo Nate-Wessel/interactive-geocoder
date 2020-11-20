@@ -1,0 +1,15 @@
+uid,label,description
+1,world,
+2,country,
+4,region,
+5,city,
+6,district,
+7,island,used for Taiwan
+8,special municipality,
+9,county,
+11,union territory,
+3,province,
+12,state,
+13,autonomous region,
+10,special administrative region,
+14,territory,
