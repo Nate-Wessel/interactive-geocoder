@@ -93,7 +93,7 @@ function showPlace(geo_id){
 					.join('li')
 					.text(j=> `${j.name} (${j.type_of})`)
 					.on('click',placeClicked)
-			} )	
+			} )
 	} )
 	// show children
 	json(`${server}/jurisdiction.php?parent=${geo_id}`).then( children => {
@@ -106,19 +106,12 @@ function showPlace(geo_id){
 			.join('li')
 			.text(j=> `${j.name} (${j.type_of})`)
 			.on('click',placeClicked)
-		addAction(addChildForm,'Add child jurisdiction')
+		select('#children input[type="button"]')
+			.on('click',addChildForm)
 	} )
 	function placeClicked(event,datum){
 		showPlace(datum.geo_id)
 	}
-}
-
-function addAction(action,label='NA'){
-	select('form #actions')
-		.append('input')
-		.attr('type','button')
-		.on('click',action)
-		.attr('value',label)
 }
 
 function clearActions(){
