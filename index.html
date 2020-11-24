@@ -1,62 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-		<title>Interactive Place Geocoder</title>
+		<title>APFC Places</title>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<link rel="stylesheet" href="styles/main.css"/>
 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" crossorigin=""/>
-		<script src="bundle.js"></script>
 	</head>
 	<body>
-	
-		<div class="search">
-			<input type="text" 
-				placeholder="Search by name or geo_id"
-				autocomplete="off"/>
-		</div> <!--.search-->
-
-		<div id="this-place">
-			<h3>This Place</h3>
-			<form>
-				<div class="input-container">
-					<input id="geo_id" type="text" placeholder="unassigned" readonly/>
-					<label for="geo_id">geo_id</label>
-				</div>
-				<div class="input-container">
-					<input id="name" type="text"/>
-					<label for="name">Name</label>
-				</div>
-				<div class="input-container">
-					<select id="type">
-						<option>type not available</option>
-					</select>
-					<label for="type">Type</label>
-				</div>
-				<div class="input-container">
-					<input id="osm_id" type="text"/>
-					<label for="osm_id">OSM_id</label>
-				</div>
-				<div id="actions"></div>
-			</form>
-		</div><!--#this-place-->
-
-		<div id="parents">
-			<h3>Parents</h3>
-			<ol></ol>
-		</div>
-
-		<div id="children">
-			<h3>Children</h3>
-			<ul></ul>
-			<input id="add-child" type="button" value="Add Child Jurisdiction"/>
-		</div>
-		
-		<div id="siblings">
-			<h3>Siblings</h3>
-			<ul></ul>
-		</div>
-		
-		<div id="map"></div>
+		<div id="root"></div>
+		<script src="dist/bundle.js"></script>
 	</body>
 </html>
