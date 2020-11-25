@@ -1,8 +1,5 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import Search from './components/Search.js'
+import App from './components/App.js'
 
-ReactDOM.render(
-  <Search/>,
-  document.querySelector('#root')
-);
+ReactDOM.render( <App/>, document.querySelector('#root') );
