@@ -1,8 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import Search from './components/Search.js'
 
 ReactDOM.render(
-	<h1>Hello World!</h1>,
-	document.querySelector('#root')
-)
-
+  <Search/>,
+  document.querySelector('#root')
+);
