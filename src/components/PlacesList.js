@@ -1,15 +1,15 @@
 import React from 'react'
 
-export function PlacesList(props){
+export default function PlacesList(props){
 	let places = props.places.map( place => {
 		return ( 
-			<li /*onClick={displayPlace}*/ key={place.geo_id}>
+			<li onClick={(event)=>props.onSelection(place)} key={place.geo_id}>
 				{displayText(place)}
 			</li>
 		)
 	})
 	return (
-		<ul className="place-list">{places}</ul>
+		<ul className="place-list" id={props.id}>{places}</ul>
 	)
 }
 
