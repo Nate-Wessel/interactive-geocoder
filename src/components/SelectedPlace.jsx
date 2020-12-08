@@ -1,5 +1,5 @@
 import React from 'react'
-import PlacesList from './PlacesList.js'
+import PlacesList from './PlacesList.jsx'
 
 export default class SelectedPlace extends React.Component {
 	render() {

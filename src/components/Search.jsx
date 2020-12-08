@@ -1,6 +1,6 @@
 import React from 'react'
 import { json } from 'd3-fetch' 
-import PlacesList from './PlacesList.js'
+import PlacesList from './PlacesList.jsx'
 
 export default class Search extends React.Component {
 	constructor(props) {
@@ -31,9 +31,8 @@ export default class Search extends React.Component {
 			<div className="search">
 				<input type="text"placeholder="Search by place name or ID"   
 					onInput={this.handleInput}/>
-				<PlacesList 
+				<PlacesList id="search-results"
 					places={this.state.searchResults}
-					id="search-results"
 					onSelection={this.props.onSelection}/>
 			</div>
 		)

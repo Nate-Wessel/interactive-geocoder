@@ -1,6 +1,6 @@
 import React from 'react'
-import Search from './Search.js'
-import SelectedPlace from './SelectedPlace.js'
+import Search from './Search.jsx'
+import SelectedPlace from './SelectedPlace.jsx'
 
 import { json } from 'd3-fetch'
 
