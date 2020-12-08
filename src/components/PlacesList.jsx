@@ -1,4 +1,5 @@
 import React from 'react'
+import { displayName } from './placeDisplayName.js'
 
 export default function PlacesList(props){
 
@@ -6,18 +7,11 @@ export default function PlacesList(props){
 		.map( place => {
 			return ( 
 				<li onClick={(event)=>props.onSelection(place)} key={place.geo_id}>
-					{displayText(place)}
+					{displayName(place)}
 				</li>
 			)
 		})
 	return (
 		<ul className="place-list" id={props.id}>{places}</ul>
 	)
-}
-
-function displayText(place){
-	let article = /^[aeiouh]/.test(place.type_of) ? 'an' : 'a'
-	// TODO set preposition properly
-	let preposition_parent = place.parent ? `in ${place.parent.name} ` : ''
-	return `${place.name} ( ${article} ${place.type_of} ${preposition_parent})`
 }

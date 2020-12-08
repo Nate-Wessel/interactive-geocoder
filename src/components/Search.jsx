@@ -1,14 +1,19 @@
-import React from 'react'
+import React, { Component } from 'react'
 import { json } from 'd3-fetch' 
 import PlacesList from './PlacesList.jsx'
 
-export default class Search extends React.Component {
+export default class Search extends Component {
 	constructor(props) {
 		super(props)
-		this.state = { searchResults:[] }
+		this.state = { 
+			searchTerm: '',
+			searchResults: []
+		}
 		this.handleInput = this.handleInput.bind(this);
 	}
 	handleInput(event) {
+		this.setState({searchTerm:event.target.value})
+		
 		let text = event.target.value.trim()
 		if(isNaN(text) && text.length < 2){
 			return this.setState({searchResults:[]})
@@ -29,7 +34,10 @@ export default class Search extends React.Component {
 	render() {	
 		return (
 			<div className="search">
-				<input type="text"placeholder="Search by place name or ID"   
+				<input 
+					type="text"
+					placeholder="Search by place name or ID"   
+					value={this.state.searchTerm}
 					onInput={this.handleInput}/>
 				<PlacesList id="search-results"
 					places={this.state.searchResults}

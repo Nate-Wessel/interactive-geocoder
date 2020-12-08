@@ -1,5 +1,8 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import App from './components/App.jsx'
+import JurisdictionManager from './components/JurisdictionManager.jsx'
 
-ReactDOM.render( <App/>, document.querySelector('#root') );
+ReactDOM.render(
+	<JurisdictionManager/>, 
+	document.querySelector('#root')
+)

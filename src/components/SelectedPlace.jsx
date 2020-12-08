@@ -1,10 +1,7 @@
 import React, { Component }from 'react'
-import PlacesList from './PlacesList.jsx'
+import RelatedPlacesList from './RelatedPlacesList.jsx'
 
 export default function SelectedPlace(props) {
-	if(!props.place){ 
-		return null 
-	}
 	let place = props.place
 	// ancestors are stored directly with the place
 	let currentPlace = place
@@ -21,16 +18,20 @@ export default function SelectedPlace(props) {
 				<b>OSM_id:</b> {place.osm_id}
 			</p>
 			<div id="relations">
-				<PlacesList id="parents" 
+				<RelatedPlacesList 
+					title="Parents" 
 					onSelection={props.onNewPlaceSelection}
 					places={ancestors}/>
+			</div>
+		</div>
+	)
+}
+/*
+
 				<PlacesList id="siblings" 
 					onSelection={props.onNewPlaceSelection}
 					places={props.siblings}/>
 				<PlacesList id="children"
 					onSelection={props.onNewPlaceSelection}
 					places={props.children}/>
-			</div>
-		</div>
-	)
-}
+*/
