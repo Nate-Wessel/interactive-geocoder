@@ -13,45 +13,37 @@ export default class App extends React.Component {
 			selectedPlaceSiblings: []
 		}
 		this.handlePlaceSelection = this.handlePlaceSelection.bind(this);
-		this.showSelectedPlace = this.showSelectedPlace.bind(this);
 	}
-	showSelectedPlace(){
-		if(this.state.selectedPlace){
-			return (
+	handlePlaceSelection(place){
+		this.setState({
+			selectedPlace: place,
+			selectedPlaceChildren: [],
+			selectedPlaceSiblings: []
+		})
+		// fetch data on relations
+		json(`./server/jurisdiction.php?parent=${place.geo_id}`)
+			.then( children => { 
+				children.sort((a,b)=> a.name < b.name ? -1 : 1 )
+				this.setState( { selectedPlaceChildren: children } ) 
+			} )
+		if(place.parent){
+			json(`./server/jurisdiction.php?parent=${place.parent.geo_id}`)
+				.then( response => {
+					siblings = response.filter(sib=>sib.geo_id!=place.geo_id)
+					siblings.sort((a,b)=> a.name < b.name ? -1 : 1 ) 
+					this.setState({selectedPlaceSiblings:siblings}) 
+				} )
+		}
+	}
+	render() {
+		return (
+			<div id="app">
+				<Search onSelection={this.handlePlaceSelection}/>
 				<SelectedPlace 
 					place={this.state.selectedPlace}
 					children={this.state.selectedPlaceChildren}
 					siblings={this.state.selectedPlaceSiblings}
 					onNewPlaceSelection={this.handlePlaceSelection}/>
-			)
-		}else{
-			return <div/>
-		}
-		
-	}
-	handlePlaceSelection(place){
-		console.log('new place selected',place)
-		this.setState({selectedPlace:place})
-		this.setState({selectedPlaceChildren:[]})
-		this.setState({selectedPlaceSiblings:[]})
-		// fetch data on relations
-		json(`./server/jurisdiction.php?parent=${place.geo_id}`)
-			.then( children => { 
-				this.setState({selectedPlaceChildren:children}) 
-			} )
-		if(place.parent){
-			json(`./server/jurisdiction.php?parent=${place.parent.geo_id}`)
-				.then( response => {
-					siblings = response.filter(sib=>sib.geo_id!=place.geo_id) 
-					this.setState({selectedPlaceSiblings:siblings}) 
-				} )
-		}
-	}
-	render() {	
-		return (
-			<div id="app">
-				<Search onSelection={this.handlePlaceSelection}/>
-				{this.showSelectedPlace()}
 			</div>
 		)
 	}

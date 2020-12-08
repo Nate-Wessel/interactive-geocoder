@@ -24,7 +24,7 @@ export default class Search extends React.Component {
 				.then(response => {
 					this.setState({searchResults:response})
 				} )
-		}	
+		}
 	}
 	render() {	
 		return (
