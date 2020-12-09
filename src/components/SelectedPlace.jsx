@@ -18,20 +18,16 @@ export default function SelectedPlace(props) {
 				<b>OSM_id:</b> {place.osm_id}
 			</p>
 			<div id="relations">
-				<RelatedPlacesList 
-					title="Parents" 
+				<RelatedPlacesList title="Parents" 
 					onSelection={props.onNewPlaceSelection}
 					places={ancestors}/>
+				<RelatedPlacesList title="Siblings" 
+					sibling={props.place}
+					onSelection={props.onNewPlaceSelection}/>
+				<RelatedPlacesList title="Children"
+					parent={props.place} 
+					onSelection={props.onNewPlaceSelection}/>
 			</div>
 		</div>
 	)
 }
-/*
-
-				<PlacesList id="siblings" 
-					onSelection={props.onNewPlaceSelection}
-					places={props.siblings}/>
-				<PlacesList id="children"
-					onSelection={props.onNewPlaceSelection}
-					places={props.children}/>
-*/
