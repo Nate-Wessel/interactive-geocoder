@@ -58,8 +58,12 @@ function insertRecord($data){
 		INSERT INTO jurisdictions ( name, parent, jurisdiction_type, osm_id ) 
 		VALUES ( $name, $parent, $jurisdiction_type, $osm_id )");
 	if($success){
-		$result = pg_query("Select geo_id WHERE name=$name AND parent=$parent;");
-		return getRecord(pg_fetch_result($result));
+		$result = pg_query("
+			SELECT geo_id 
+			FROM jurisdictions 
+			WHERE name=$name AND parent=$parent;
+		");
+		return getRecord(pg_fetch_object($result)->geo_id);
 	}else{
 		return pg_last_error();
 	}

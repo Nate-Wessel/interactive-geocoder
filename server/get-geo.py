@@ -4,7 +4,7 @@ from shapely.wkb import dumps as dumpWKB
 import psycopg2
 from time import sleep
 
-conn_str = "host='localhost' dbname='APFC' user='nate' password=''"
+conn_str = "host='localhost' dbname='APFC' user='nate' password='mink'"
 connection = psycopg2.connect(conn_str)
 connection.autocommit = True
 cursor = connection.cursor()
