@@ -11,7 +11,9 @@ export default function SelectedPlace(props) {
 				<b>geo_id:</b> {props.place.geo_id}<br/>
 				<b>OSM_id:</b> {props.place.osm_id}
 			</p>
-			<AddChildForm parent={props.place}/>
+			<AddChildForm 
+				parent={props.place}
+				onAddition={props.onNewPlaceSelection}/>
 			<div id="relations">
 				<RelatedPlacesList title="Parents"  child={props.place}
 					onSelection={props.onNewPlaceSelection}/>

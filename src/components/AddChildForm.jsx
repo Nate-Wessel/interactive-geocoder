@@ -63,8 +63,17 @@ export default function(props){
 			}),
 			headers: { 'Content-Type': 'application/json' }
 		}
-		fetch('./server/jurisdiction.php', options)
-			.then(response => console.log(response.json()))
+		json('./server/jurisdiction.php', options)
+			.then(response => {
+				console.log(response)
+				if(response.geo_id){
+					setDisplayForm(false)
+					setName('')
+					setSelectedType(null)
+					setOsmid('')
+					props.onAddition(response)
+				}
+			})
 		// reset the form
 	}
 }
