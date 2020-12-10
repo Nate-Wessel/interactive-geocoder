@@ -6,19 +6,26 @@ export default function(props){
 	const [selectedType,setSelectedType] = useState(null)
 	const [types,setTypes] = useState([])
 	const [osmid,setOsmid] = useState('')
+	const [displayForm,setDisplayForm] = useState(false)
 	useEffect(()=>{
 		// fetch types one when component mounted
 		json('./server/jurisdiction.php?types')
 			.then(types=>setTypes(types.sort((a,b)=>a.label<b.label?-1:1)))
 	},[])
-	return ( 
+	const addButton = (
+		<button onClick={()=>{setDisplayForm(true)}}>
+			Add Child Jurisdiction
+		</button>
+	)
+	const submitButton = (
+		<button type="button" onClick={submitForm}>Submit</button>
+	)
+	const form = (
 		<form>
-		
 			<label htmlFor="name">Name</label><br/>
 			<input id="name" type="text" 
 				value={name} 
 				onInput={(e)=>setName(e.target.value)}/><br/>
-			
 			<label htmlFor="type">Type</label><br/>
 			<select id="type" onChange={(e)=>setSelectedType(e.target.value)}>
 				<option value="junk">No selection</option>
@@ -26,15 +33,17 @@ export default function(props){
 					return <option key={i} value={type.uid}>{type.label}</option> 
 				} )}
 			</select><br/>
-			
 			<label htmlFor="osmid">OSM ID</label><br/>
 			<input id="osmid" type="text" 
 				value={osmid} 
 				onInput={(e)=>setOsmid(e.target.value)}/><br/>
-
-			{formIsValid() && <button type="button" onClick={submitForm}>Submit</button>}
-			
+			{formIsValid() && submitButton}
 		</form>
+	)
+	return ( 
+		<div className="container">
+			{displayForm ? form : addButton}
+		</div>
 	)
 	function formIsValid(){
 		return ( 

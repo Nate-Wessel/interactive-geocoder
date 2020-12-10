@@ -1,6 +1,6 @@
 import React from 'react'
 import RelatedPlacesList from './RelatedPlacesList.jsx'
-import AddFeatureForm from './AddFeatureForm.jsx'
+import AddChildForm from './AddChildForm.jsx'
 
 export default function SelectedPlace(props) {
 	return (
@@ -11,8 +11,7 @@ export default function SelectedPlace(props) {
 				<b>geo_id:</b> {props.place.geo_id}<br/>
 				<b>OSM_id:</b> {props.place.osm_id}
 			</p>
-			<button onClick={()=>{}}>Add Child</button>
-			<AddFeatureForm parent={props.place}/>
+			<AddChildForm parent={props.place}/>
 			<div id="relations">
 				<RelatedPlacesList title="Parents"  child={props.place}
 					onSelection={props.onNewPlaceSelection}/>
