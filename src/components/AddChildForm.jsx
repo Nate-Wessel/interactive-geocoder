@@ -58,7 +58,7 @@ export default function(props){
 			body: JSON.stringify({
 				'name': name,
 				'parent':props.parent.geo_id,
-				'jurisdiction_type':selectedType,
+				'type':selectedType,
 				'osm_id':osmid
 			}),
 			headers: { 'Content-Type': 'application/json' }

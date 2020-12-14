@@ -52,11 +52,11 @@ function updateRecord($data){
 function insertRecord($data){
 	$name = pg_escape_literal($data->name);
 	$parent = pg_escape_literal($data->parent);
-	$jurisdiction_type = pg_escape_literal($data->jurisdiction_type);
+	$type = pg_escape_literal($data->type);
 	$osm_id = pg_escape_literal($data->osm_id);
 	$success = pg_query("
-		INSERT INTO jurisdictions ( name, parent, jurisdiction_type, osm_id ) 
-		VALUES ( $name, $parent, $jurisdiction_type, $osm_id )");
+		INSERT INTO jurisdictions ( name, parent, type, osm_id ) 
+		VALUES ( $name, $parent, $type, $osm_id )");
 	if($success){
 		$result = pg_query("
 			SELECT geo_id 
@@ -76,12 +76,12 @@ function getRecord($geo_id){
 		SELECT 
 			geo_id,
 			name, 
-			jt.label AS type_of,
+			jurisdiction_types.label AS type_of,
 			parent, 
 			osm_id
-		FROM jurisdictions AS j
-		JOIN jurisdiction_types AS jt 
-			ON j.jurisdiction_type = jt.uid
+		FROM jurisdictions
+		JOIN jurisdiction_types
+			ON jurisdictions.type = jurisdiction_types.uid
 		WHERE geo_id = $geo_id;";
 	$record = pg_fetch_object( pg_query($query) );
 	if( $record and !is_null($record->parent) ){
