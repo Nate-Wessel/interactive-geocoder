@@ -96,7 +96,8 @@ function getRecords($searchTerm){
 		SELECT geo_id 
 		FROM jurisdictions
 		WHERE similarity({$searchTerm},name) >= 0.1
-		ORDER BY similarity({$searchTerm},name) DESC;";
+		ORDER BY similarity({$searchTerm},name) DESC
+		LIMIT 8;";
 	$results = pg_query($query);
 	$searchResults = [];
 	while($record = pg_fetch_object($results)){
