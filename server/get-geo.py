@@ -20,7 +20,7 @@ cursor.execute("""
 	FROM jurisdictions 
 	WHERE 
 		osm_id IS NOT NULL AND
-		osm_update IS NULL AND 
+		point IS NULL AND 
 		geo_id != 42
 	LIMIT 40;"""
 )
