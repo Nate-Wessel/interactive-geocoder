@@ -14,3 +14,5 @@ uid,label,description
 13,autonomous region,
 14,territory,
 15,township,
+16,municipality,
+17,village,

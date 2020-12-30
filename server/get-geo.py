@@ -14,12 +14,12 @@ register_hstore(connection)
 
 overpass_url = "http://overpass-api.de/api/interpreter"
 
-
+# records to process
 cursor.execute("""
 	SELECT geo_id, osm_id, name
 	FROM jurisdictions 
 	WHERE 
-		osm_id IS NOT NULL AND 
+		osm_id IS NOT NULL AND
 		osm_update IS NULL AND 
 		geo_id != 42
 	LIMIT 40;"""
