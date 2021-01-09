@@ -79,7 +79,8 @@ function getRecord($geo_id){
 			jurisdiction_types.label AS type_of,
 			parent, 
 			osm_id,
-			osm_tags->'wikipedia' AS wiki
+			osm_tags->'wikipedia' AS wiki,
+			osm_tags->'website' AS website
 		FROM jurisdictions
 		JOIN jurisdiction_types
 			ON jurisdictions.type = jurisdiction_types.uid

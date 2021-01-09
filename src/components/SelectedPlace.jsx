@@ -6,23 +6,29 @@ export default function SelectedPlace(props) {
 	return (
 		<div id="selected-place">
 			<h1>{props.place.name}</h1>
-			<p>
-				<b>Type:</b> {props.place.type_of}<br/>
-				<b>geo_id:</b> {props.place.geo_id}<br/>
-				<b>OSM_id:</b> {props.place.osm_id}<br/>
+			<div><b>Type:</b> {props.place.type_of}</div>
+			<div><b>geo_id:</b> {props.place.geo_id}</div>
+			<div><b>OSM_id:</b> {props.place.osm_id}</div>
+			<div>
 				<a href={`https://www.openstreetmap.org/relation/${props.place.osm_id}`}
 					target="_blank">
 					OSM relation
-				</a><br/>
+				</a>
+			</div>
+			<ul>
 				{props.place.wiki && 
-					<span>
+					<li>
 						<a href={`https://en.wikipedia.org/wiki/${props.place.wiki}`}
-							target="_blank">
-							Wikipedia
-						</a> (per OSM)
-					</span>
+							target="_blank">Wikipedia</a>
+					</li>
 				}
-			</p>
+				{props.place.website && 
+					<li>
+						<a href={props.place.website}
+							target="_blank">Website</a>
+					</li>
+				}
+			</ul>
 			<AddChildForm 
 				parent={props.place}
 				onAddition={props.onNewPlaceSelection}/>
