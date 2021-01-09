@@ -1,38 +1,23 @@
-import React, { Component } from 'react'
+import React, { useState } from 'react'
 import Search from './Search.jsx'
 import SelectedPlace from './SelectedPlace.jsx'
 
-import { json } from 'd3-fetch'
+export default function JurisdictionManager(props) {
+	const [place,selectPlace] = useState(null)
 
-const acceptedModes = new Set(['search','display','create','edit'])
-
-export default class JurisdictionManager extends Component {
-	constructor(props) { 
-		super(props)
-		this.state = { 
-			selectedPlace: null
-		}
-		this.selectPlace = this.selectPlace.bind(this)
-		this.unselectPlace = this.unselectPlace.bind(this)
+	function unselectPlace(){
+		selectPlace(null)
 	}
-	selectPlace(place){
-		this.setState({ selectedPlace: place })
-	}
-	unselectPlace(){
-		this.setState({selectedPlace:null})
-	}
-	render() {
-		if(this.state.selectedPlace){
-			return (
-				<div className="container">
-					<button onClick={this.unselectPlace}>Return to Search</button>
-					<SelectedPlace 
-						place={this.state.selectedPlace}
-						onNewPlaceSelection={this.selectPlace}/>
-				</div>
-			)
-		}else{
-			return <Search onSelection={this.selectPlace}/>
-		}
+	if(place){
+		return (
+			<div className="container">
+				<button onClick={unselectPlace}>Return to Search</button>
+				<SelectedPlace 
+					place={place}
+					onNewPlaceSelection={selectPlace}/>
+			</div>
+		)
+	}else{
+		return <Search onSelection={selectPlace}/>
 	}
 }
