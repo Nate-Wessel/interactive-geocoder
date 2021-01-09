@@ -13,7 +13,13 @@ export default function SelectedPlace(props) {
 				<a href={`https://www.openstreetmap.org/relation/${props.place.osm_id}`}
 					target="_blank">
 					OSM relation
-				</a>
+				</a><br/>
+				{props.place.wiki && 
+					<a href={`https://en.wikipedia.org/wiki/${props.place.wiki}`}
+						target="_blank">
+						Wikipedia
+					</a>
+				}
 			</p>
 			<AddChildForm 
 				parent={props.place}
