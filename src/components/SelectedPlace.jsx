@@ -15,10 +15,12 @@ export default function SelectedPlace(props) {
 					OSM relation
 				</a><br/>
 				{props.place.wiki && 
-					<a href={`https://en.wikipedia.org/wiki/${props.place.wiki}`}
-						target="_blank">
-						Wikipedia
-					</a>
+					<span>
+						<a href={`https://en.wikipedia.org/wiki/${props.place.wiki}`}
+							target="_blank">
+							Wikipedia
+						</a> (per OSM)
+					</span>
 				}
 			</p>
 			<AddChildForm 
