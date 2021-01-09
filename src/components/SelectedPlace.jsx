@@ -9,7 +9,11 @@ export default function SelectedPlace(props) {
 			<p>
 				<b>Type:</b> {props.place.type_of}<br/>
 				<b>geo_id:</b> {props.place.geo_id}<br/>
-				<b>OSM_id:</b> {props.place.osm_id}
+				<b>OSM_id:</b> {props.place.osm_id}<br/>
+				<a href={`https://www.openstreetmap.org/relation/${props.place.osm_id}`}
+					target="_blank">
+					OSM relation
+				</a>
 			</p>
 			<AddChildForm 
 				parent={props.place}
