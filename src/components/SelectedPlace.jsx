@@ -1,49 +1,55 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import { json } from 'd3-fetch'
 import RelatedPlacesList from './RelatedPlacesList.jsx'
 import AddChildForm from './AddChildForm.jsx'
 
 export default function SelectedPlace(props) {
+	const { geo_id } = useParams()
+	const [ place, setPlace ] = useState(null)
+	useEffect(()=>{
+		json(`./server/jurisdiction.php?geo_id=${geo_id}`)
+			.then( response => setPlace(response) )
+	},[geo_id])
+	if( ! place ){
+		return null
+	}
 	return (
 		<div>
 		<div id="selected-place">
-			<h1>{props.place.name}</h1>
-			<div><b>Type:</b> {props.place.type_of}</div>
-			<div><b>geo_id:</b> {props.place.geo_id}</div>
-			<div><b>OSM_id:</b> {props.place.osm_id}</div>
+			<h1>{place.name}</h1>
+			<div><b>Type:</b> {place.type_of}</div>
+			<div><b>geo_id:</b> {place.geo_id}</div>
+			<div><b>OSM_id:</b> {place.osm_id}</div>
 			<h3>Outside links</h3>
 			<ul>
-				{props.place.osm_id &&
+				{place.osm_id &&
 					<li>
-						<a href={`https://www.openstreetmap.org/relation/${props.place.osm_id}`}
+						<a href={`https://www.openstreetmap.org/relation/${place.osm_id}`}
 							target="_blank">
 							OpenStreetMap
 						</a>
 					</li>
 				}
-				{props.place.wiki && 
+				{place.wiki && 
 					<li>
-						<a href={`https://en.wikipedia.org/wiki/${props.place.wiki}`}
+						<a href={`https://en.wikipedia.org/wiki/${place.wiki}`}
 							target="_blank">Wikipedia</a>
 					</li>
 				}
-				{props.place.website && 
+				{place.website && 
 					<li>
-						<a href={props.place.website}
+						<a href={place.website}
 							target="_blank">Website</a>
 					</li>
 				}
 			</ul>
-			<AddChildForm 
-				parent={props.place}
-				onAddition={props.onNewPlaceSelection}/>
+			<AddChildForm parent={place}/>
 		</div>
 		<div id="relations">
-				<RelatedPlacesList title="Parents"  child={props.place}
-					onSelection={props.onNewPlaceSelection}/>
-				<RelatedPlacesList title="Siblings" sibling={props.place}
-					onSelection={props.onNewPlaceSelection}/>
-				<RelatedPlacesList title="Children" parent={props.place} 
-					onSelection={props.onNewPlaceSelection}/>
+				<RelatedPlacesList title="Parents"  child={place}/>
+				<RelatedPlacesList title="Siblings" sibling={place}/>
+				<RelatedPlacesList title="Children" parent={place}/>
 		</div>
 		</div>
 	)

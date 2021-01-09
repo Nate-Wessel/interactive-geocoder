@@ -1,23 +1,25 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { 
+	HashRouter as Router,
+	Switch,
+	Route
+} from 'react-router-dom'
 import Search from './Search.jsx'
 import SelectedPlace from './SelectedPlace.jsx'
 
 export default function JurisdictionManager(props) {
-	const [place,selectPlace] = useState(null)
-
-	function unselectPlace(){
-		selectPlace(null)
-	}
-	if(place){
-		return (
-			<div className="container">
-				<button onClick={unselectPlace}>Return to Search</button>
-				<SelectedPlace 
-					place={place}
-					onNewPlaceSelection={selectPlace}/>
-			</div>
-		)
-	}else{
-		return <Search onSelection={selectPlace}/>
-	}
+	return (
+		<Router>
+			<Switch>
+				<Route path="/:geo_id">
+					<Link to="/">Return to Search</Link>
+					<SelectedPlace/>
+				</Route>
+				<Route path="/">
+					<Search/>
+				</Route>
+			</Switch>
+		</Router>
+	)
 }

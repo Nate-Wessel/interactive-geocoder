@@ -18,6 +18,7 @@
     "d3-fetch": "^2.0.0",
     "d3-selection": "^2.0.0",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "react-router-dom": "^5.2.0"
   }
 }

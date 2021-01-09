@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { displayName } from './placeDisplayName.js'
 import { json } from 'd3-fetch'
 
@@ -25,9 +26,8 @@ export default function RelatedPlacesList(props){
 	
 	let placesList = places.map( place => {
 		return (
-			<li key={place.geo_id}
-				onClick={(event)=>props.onSelection(place)}>
-				{displayName(place)}
+			<li key={place.geo_id}>
+				<Link to={`/${place.geo_id}`}>{displayName(place)}</Link>
 			</li>
 		)
 	})

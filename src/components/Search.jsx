@@ -40,8 +40,7 @@ export default class Search extends Component {
 					value={this.state.searchTerm}
 					onInput={this.handleInput}/>
 				<PlacesList id="search-results"
-					places={this.state.searchResults}
-					onSelection={this.props.onSelection}/>
+					places={this.state.searchResults}/>
 			</div>
 		)
 	}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Redirect } from 'react-router-dom'
 import { json } from 'd3-fetch'
 
 export default function(props){
@@ -7,6 +8,7 @@ export default function(props){
 	const [types,setTypes] = useState([])
 	const [osmid,setOsmid] = useState('')
 	const [displayForm,setDisplayForm] = useState(false)
+	const [newGeo_id,setNewGeo_id] = useState(null)
 	useEffect(()=>{
 		// fetch types one when component mounted
 		json('./server/jurisdiction.php?types')
@@ -42,6 +44,7 @@ export default function(props){
 	)
 	return ( 
 		<div className="container">
+			{newGeo_id && <Redirect to={`/${newGeo_id}`}/>}
 			{displayForm ? form : addButton}
 		</div>
 	)
@@ -71,7 +74,7 @@ export default function(props){
 					setName('')
 					setSelectedType(null)
 					setOsmid('')
-					props.onAddition(response)
+					setNewGeo_id(response.geo_id)
 				}
 			})
 		// reset the form
