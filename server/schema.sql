@@ -19,9 +19,8 @@ CREATE TABLE jurisdictions (
 	land_polygon geometry(MULTIPOLYGON,4326), -- clipped to coastline
 	UNIQUE (name, parent, type)
 );
-CREATE INDEX ON jurisdictions USING GIST(full_polygon);
+CREATE INDEX ON jurisdictions USING GIST(osm_polygon);
 CREATE INDEX ON jurisdictions USING GIST(land_polygon);
-CREATE INDEX ON jurisdictions USING GIST(simplified_10m_polygon);
 
 -- get child depth
 CREATE OR REPLACE VIEW jurisdiction_depth AS (

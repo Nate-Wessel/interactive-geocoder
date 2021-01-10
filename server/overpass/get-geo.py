@@ -4,8 +4,31 @@ from shapely.wkb import dumps as dumpWKB
 import psycopg2
 from psycopg2.extras import register_hstore
 from time import sleep
+from sshtunnel import SSHTunnelForwarder
+from config import config as conf
 
-conn_str = "host='localhost' dbname='APFC' user='nate' password='mink'"
+server = SSHTunnelForwarder(
+	(conf['server'], conf['sshPort']),
+	ssh_username = conf['sshUser'],
+	ssh_password = conf['sshPassword'],
+	remote_bind_address = ('localhost', conf['dbPort'])
+)
+
+server.start()
+
+conn_str = """
+	host='localhost' 
+	port='{port}' 
+	dbname='{database}' 
+	user='{user}' 
+	password='{password}'
+""".format(
+	port = server.local_bind_port,
+	database = conf['database'],
+	user = conf['dbUser'],
+	password = conf['dbPassword']
+)
+
 connection = psycopg2.connect(conn_str)
 connection.autocommit = True
 cursor = connection.cursor()
@@ -22,7 +45,7 @@ cursor.execute("""
 		osm_id IS NOT NULL AND
 		osm_update IS NULL AND 
 		geo_id != 42
-	LIMIT 40;"""
+	LIMIT 100;"""
 )
 for ( geo_id, osm_id, name ) in cursor.fetchall():
 	print('%s (%s) osm: %s'%(name,geo_id,osm_id))
@@ -86,5 +109,8 @@ for ( geo_id, osm_id, name ) in cursor.fetchall():
 		}
 	)
 	
-			
+	# give the Overpass API a little break	
 	sleep(1)
+connection.close()
+server.stop()
+print('Success!')
