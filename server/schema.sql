@@ -22,7 +22,16 @@ CREATE TABLE jurisdictions (
 CREATE INDEX ON jurisdictions USING GIST(osm_polygon);
 CREATE INDEX ON jurisdictions USING GIST(land_polygon);
 
--- get child depth
+CREATE TABLE sisters (
+	uid serial PRIMARY KEY,
+	geo_id_canada integer REFERENCES jurisdictions (geo_id),
+	geo_id_other integer REFERENCES jurisdictions (geo_id),
+	year_start int,
+	month_start int, 
+	day_start int
+);
+
+-- get child depth in a view
 CREATE OR REPLACE VIEW jurisdiction_depth AS (
 	WITH RECURSIVE t (geo_id, parent, depth) AS (
 		SELECT geo_id, parent, 0 AS depth
@@ -66,3 +75,30 @@ SELECT
 FROM jurisdictions AS j
 JOIN jurisdiction_types AS jt ON j.type = jt.uid
 JOIN jurisdiction_depth AS jd ON j.geo_id = jd.geo_id;
+
+-- view on sister city relations with an eye toward exporting as geojson
+CREATE OR REPLACE VIEW sister_jurisdictions AS 
+WITH dups AS (
+	SELECT 
+		geo_id,
+		case 
+			WHEN geo_id = geo_id_canada THEN geo_id_other 
+			ELSE geo_id_canada
+		END as sister
+	FROM jurisdictions_plus
+	JOIN sisters
+		ON geo_id = geo_id_canada OR geo_id = geo_id_other
+)
+SELECT 
+	j.geo_id,
+	array_to_json(array_agg(sister))::text AS links,
+	json_build_object(
+		'en', name_en,
+		'fr', name_fr,
+		'local', name_loc
+	)::text AS name,
+	point
+FROM dups
+JOIN jurisdictions_plus AS j 
+	ON dups.geo_id = j.geo_id
+GROUP BY j.geo_id, j.name_en, j.name_fr, j.name_loc, point;

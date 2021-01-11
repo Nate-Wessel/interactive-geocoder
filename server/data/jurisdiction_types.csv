@@ -16,3 +16,5 @@ uid,label,description
 15,township,
 16,municipality,
 17,village,
+18,town,
+19,regional municipality,
