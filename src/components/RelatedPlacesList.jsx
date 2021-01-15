@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { displayName } from './placeDisplayName.js'
 import { json } from 'd3-fetch'
+import { publicAPI } from '../API.js'
 
 export default function RelatedPlacesList(props){
 	const [collapsed,setCollapsed] = useState(true)
@@ -45,7 +46,7 @@ export default function RelatedPlacesList(props){
 	}
 	function getSiblings(place){
 		if(place.parent){
-			json(`./server/jurisdiction.php?parent=${place.parent.geo_id}`)
+			json(`${publicAPI}?parent=${place.parent.geo_id}`)
 				.then( children => { 
 					let siblings = children
 						.filter(sib=>sib.geo_id!=place.geo_id)
@@ -55,7 +56,7 @@ export default function RelatedPlacesList(props){
 		}
 	}
 	function getChildren(place){
-		json(`./server/jurisdiction.php?parent=${place.geo_id}`)
+		json(`${publicAPI}?parent=${place.geo_id}`)
 			.then( children => { 
 				children.sort((a,b)=> a.name < b.name ? -1 : 1 )
 				setPlaces(children)

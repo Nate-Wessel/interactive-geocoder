@@ -3,12 +3,13 @@ import { useParams } from 'react-router-dom'
 import { json } from 'd3-fetch'
 import RelatedPlacesList from './RelatedPlacesList.jsx'
 import AddChildForm from './AddChildForm.jsx'
+import { publicAPI } from '../API.js'
 
 export default function SelectedPlace(props) {
 	const { geo_id } = useParams()
 	const [ place, setPlace ] = useState(null)
 	useEffect(()=>{
-		json(`./server/jurisdiction.php?geo_id=${geo_id}`)
+		json(`${publicAPI}?geo_id=${geo_id}&withAncestors`)
 			.then( response => setPlace(response) )
 	},[geo_id])
 	if( ! place ){

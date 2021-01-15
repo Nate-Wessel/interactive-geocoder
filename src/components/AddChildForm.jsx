@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Redirect } from 'react-router-dom'
 import { json } from 'd3-fetch'
+import { publicAPI } from '../API.js'
 
 export default function(props){
 	const [name,setName] = useState('')
@@ -11,7 +12,7 @@ export default function(props){
 	const [newGeo_id,setNewGeo_id] = useState(null)
 	useEffect(()=>{
 		// fetch types one when component mounted
-		json('./server/jurisdiction.php?types')
+		json(`${publicAPI}?types`)
 			.then(types=>setTypes(types.sort((a,b)=>a.label<b.label?-1:1)))
 	},[])
 	const addButton = (

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { json } from 'd3-fetch' 
 import PlacesList from './PlacesList.jsx'
+import { publicAPI } from '../API.js'
 
 export default function(props) {
 	const [ searchTerm, setSearchTerm ] = useState('')
@@ -26,13 +27,13 @@ export default function(props) {
 			return setSearchResults([])
 		}
 		if(!isNaN(text) & Number(text) > 0){
-			json(`./server/jurisdiction.php?geo_id=${Number(text)}`)
+			json(`${publicAPI}?geo_id=${Number(text)}`)
 				.then( response => {
 					// response can be 'undefined'
 					setSearchResults( response ? [response] : [] )
 				} )
 		}else{
-			json(`./server/jurisdiction.php?search=${text}`)
+			json(`${publicAPI}?search=${text}`)
 				.then( response => setSearchResults(response) )
 		}
 	}
