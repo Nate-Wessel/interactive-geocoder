@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { HashRouter as Router, Route } from 'react-router-dom'
 import Search from '../Search'
 import SelectedPlace from '../SelectedPlace'
-import Relations from '../SelectedPlace/Relations.jsx'
+import Relations from '../SelectedPlace/Relations'
 import './main.css'
 
 export default function JurisdictionManager(props) {
