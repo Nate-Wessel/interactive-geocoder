@@ -1,52 +1,43 @@
 import React, { useState, useEffect } from 'react'
-import { Redirect } from 'react-router-dom'
+import { Redirect, useParams } from 'react-router-dom'
 import { json } from 'd3-fetch'
-import { publicAPI } from './API.js'
+import { publicAPI, privateAPI } from './API.js'
 
 export default function(props){
 	const [name,setName] = useState('')
 	const [selectedType,setSelectedType] = useState(null)
 	const [types,setTypes] = useState([])
 	const [osmid,setOsmid] = useState('')
-	const [displayForm,setDisplayForm] = useState(false)
 	const [newGeo_id,setNewGeo_id] = useState(null)
 	useEffect(()=>{
 		// fetch types one when component mounted
 		json(`${publicAPI}?types`)
 			.then(types=>setTypes(types.sort((a,b)=>a.label<b.label?-1:1)))
 	},[])
-	const addButton = (
-		<button onClick={()=>{setDisplayForm(true)}}>
-			Add Child Jurisdiction
-		</button>
-	)
-	const submitButton = (
-		<button type="button" onClick={submitForm}>Submit</button>
-	)
-	const form = (
-		<form>
-			<label htmlFor="name">Name</label><br/>
-			<input id="name" type="text" 
-				value={name} 
-				onInput={(e)=>setName(e.target.value)}/><br/>
-			<label htmlFor="type">Type</label><br/>
-			<select id="type" onChange={(e)=>setSelectedType(e.target.value)}>
-				<option value="junk">No selection</option>
-				{types.map( (type,i) => {
-					return <option key={i} value={type.uid}>{type.label}</option> 
-				} )}
-			</select><br/>
-			<label htmlFor="osmid">OSM ID</label><br/>
-			<input id="osmid" type="text" 
-				value={osmid} 
-				onInput={(e)=>setOsmid(e.target.value)}/><br/>
-			{formIsValid() && submitButton}
-		</form>
-	)
 	return ( 
 		<div className="container">
+			<h2>Add a child jurisdiction</h2>
 			{newGeo_id && <Redirect to={`/${newGeo_id}`}/>}
-			{displayForm ? form : addButton}
+			<form>
+				<label htmlFor="name">Name</label><br/>
+				<input id="name" type="text" 
+					value={name} 
+					onInput={(e)=>setName(e.target.value)}/><br/>
+				<label htmlFor="type">Type</label><br/>
+				<select id="type" onChange={(e)=>setSelectedType(e.target.value)}>
+					<option value="junk">No selection</option>
+					{types.map( (type,i) => {
+						return <option key={i} value={type.uid}>{type.label}</option> 
+					} )}
+				</select><br/>
+				<label htmlFor="osmid">OSM ID</label><br/>
+				<input id="osmid" type="text" 
+					value={osmid} 
+					onInput={(e)=>setOsmid(e.target.value)}/><br/>
+				{ formIsValid() && 
+				<button type="button" onClick={submitForm}>Submit</button>
+				}
+			</form>
 		</div>
 	)
 	function formIsValid(){

@@ -38,7 +38,6 @@ function RelatedPlaces(props){
 	)
 	
 	function getAncestors(geo_id){
-		console.log('find ances')
 		json(`${publicAPI}?geo_id=${geo_id}&withAncestors`).then( place => { 
 			let ancestors = []
 			while(place.parent){ 
