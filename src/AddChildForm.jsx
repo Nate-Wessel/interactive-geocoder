@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Redirect } from 'react-router-dom'
 import { json } from 'd3-fetch'
-import { publicAPI } from '../API.js'
+import { publicAPI } from './API.js'
 
 export default function(props){
 	const [name,setName] = useState('')

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { json } from 'd3-fetch' 
 import PlacesList from './PlacesList.jsx'
-import { publicAPI } from '../API.js'
+import { publicAPI } from './API.js'
 
 export default function(props) {
 	const [ searchTerm, setSearchTerm ] = useState('')

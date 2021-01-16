@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { displayName } from './placeDisplayName.js'
 import { json } from 'd3-fetch'
-import { publicAPI } from '../API.js'
+import { publicAPI } from './API.js'
 
 export default function RelatedPlacesList(props){
 	const [collapsed,setCollapsed] = useState(true)

@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 import { json } from 'd3-fetch'
 import RelatedPlacesList from './RelatedPlacesList.jsx'
 import AddChildForm from './AddChildForm.jsx'
-import { publicAPI } from '../API.js'
+import { publicAPI } from './API.js'
 
 export default function SelectedPlace(props) {
 	const { geo_id } = useParams()
