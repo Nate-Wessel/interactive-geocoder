@@ -1,19 +1,37 @@
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { displayName } from './placeDisplayName.js'
+import { Link, useParams } from 'react-router-dom'
+import { displayName } from '../placeDisplayName.js'
+import PlacesList from '../PlacesList' 
 import { json } from 'd3-fetch'
-import { publicAPI } from './API.js'
+import { publicAPI } from '../API.js'
 
-export default function RelatedPlacesList(props){
+export default function(){
+	const { geo_id } = useParams()
+	return (
+		<div id="relations">
+			<RelatedPlaces title="Parents"  child={geo_id}/>
+			<RelatedPlaces title="Siblings" sibling={geo_id}/>
+			<RelatedPlaces title="Children" parent={geo_id}/>
+		</div>
+	)
+}
+
+function RelatedPlaces(props){
 	const [collapsed,setCollapsed] = useState(true)
 	const [places,setPlaces] = useState([])
 
 	useEffect(()=>{
 		// get the related places
-		if(props.child){ getAncestors(props.child) }
-		else if(props.sibling){ getSiblings(props.sibling) }
-		else if(props.parent){ getChildren(props.parent) }
-		// reset on update to props
+		if(props.child){ 
+			getAncestors(props.child) 
+		}
+		else if(props.sibling){ 
+			getSiblings(props.sibling) 
+		}
+		else if(props.parent){ 
+			getChildren(props.parent) 
+		}
+		// reset on any update to props
 		return () => { setPlaces([]) }
 	},[props.child,props.sibling,props.parent])
 
@@ -23,19 +41,10 @@ export default function RelatedPlacesList(props){
 		</h3>
 	)
 	
-	if(collapsed){ return <div>{title}</div> }
-	
-	let placesList = places.map( place => {
-		return (
-			<li key={place.geo_id}>
-				<Link to={`/${place.geo_id}`}>{displayName(place)}</Link>
-			</li>
-		)
-	})
 	return (
 		<div>
 			{title}
-			<ul className="place-list">{placesList}</ul>
+			{ ! collapsed && <PlacesList places={places}/> }
 		</div>
 	)
 	function getAncestors(place){
@@ -55,8 +64,8 @@ export default function RelatedPlacesList(props){
 				} )
 		}
 	}
-	function getChildren(place){
-		json(`${publicAPI}?parent=${place.geo_id}`)
+	function getChildren(geo_id){
+		json(`${publicAPI}?parent=${geo_id}`)
 			.then( children => { 
 				children.sort((a,b)=> a.name < b.name ? -1 : 1 )
 				setPlaces(children)

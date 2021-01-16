@@ -13,7 +13,7 @@
 	src: url('fonts/Avenir-bold.ttf');
 	font-weight: bold;
 	font-style: normal; }
-	
+
 :root {
 	--bg: #f9f9f9;
 	--text: #2b2b2b;
@@ -28,23 +28,18 @@ a { color: var(--link); text-decoration: none; }
 a:hover { text-decoration: underline; }
 a:visited { color: #7d3ac1; }
 
-html {
+html, body, #root, #app-container {
+	height: 100%;
+}
+
+body {
 	font-family: 'Avenir';
 	color: var(--text);
-	background-color: var(--bg); }
-
-.search input {
-	min-width: 300px;
-	max-width: 100%;
-	font-size: 1.8em;
-	padding: 20px;
-	border: none;
-	background-color: #ececec; }
-.place-list {
-	list-style: none;
-	padding: 0; }
-.place-list li {
-	padding: 4px; }
-.place-list li:hover {
-	background-color: var(--orange); }
-	
+	background-color: var(--bg); 
+}
+div#app-container {
+	display: flex;
+	flex-wrap: wrap; 
+	justify-content: center;
+	align-items: center;
+}
