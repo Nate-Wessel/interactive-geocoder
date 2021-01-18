@@ -20,18 +20,18 @@ export default function JurisdictionManager(props) {
 			<Router>
 				<Switch>
 					<Route path="/:geo_id/addChild">
-						<Nav/>
 						<SelectedPlace/>
 						<AddChildForm/>
+						<Return2Search/>
 					</Route>
 					<Route path="/:geo_id/relations">
-						<Nav/>
 						<SelectedPlace/>
 						<Relations/>
+						<Return2Search/>
 					</Route>
 					<Route path="/:geo_id">
-						<Nav/>
 						<SelectedPlace/>
+						<Return2Search/>
 					</Route>
 					<Route path="/" component={Search}/>
 				</Switch>
@@ -40,13 +40,10 @@ export default function JurisdictionManager(props) {
 	)
 }
 
-function Nav(props){
-	const { geo_id } = useParams()
+function Return2Search(props){
 	return (
-		<nav>
-			<NavLink to="/">Search</NavLink>
-			<NavLink to={`/${geo_id}/relations`}>Relations</NavLink>
-			<NavLink to={`/${geo_id}/addChild`}>Add Child</NavLink>
-		</nav>
+		<NavLink to="/" id="search-link">
+			Return to Search
+		</NavLink>
 	)
 }
