@@ -44,7 +44,7 @@ export default function SelectedPlace(props) {
 				{place.website && 
 					<li>
 						<a href={place.website}
-							target="_blank">Website</a>
+							target="_blank">Its own Website</a>
 					</li>
 				}
 			</ul>
