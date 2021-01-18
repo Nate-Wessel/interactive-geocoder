@@ -47,6 +47,10 @@ body {
 	position: fixed;
 	display: block;
 	margin: 10px; 
-	bottom: 0;
-	right: 0;
+	top: 0;
+	left: 0;
+	font-size: 1.3em;
+}
+#search-link::before {
+	content: '<< '
 }
