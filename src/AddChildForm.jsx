@@ -52,13 +52,13 @@ export default function(props){
 			method: 'POST',
 			body: JSON.stringify({
 				'name': name,
-				'parent':props.parent.geo_id,
+				'parent':props.parent,
 				'type':selectedType,
 				'osm_id':osmid
 			}),
 			headers: { 'Content-Type': 'application/json' }
 		}
-		json('./server/jurisdiction.php', options)
+		json(privateAPI, options)
 			.then(response => {
 				console.log(response)
 				if(response.geo_id){
