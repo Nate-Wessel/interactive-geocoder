@@ -1,11 +1,5 @@
 export function displayName(place){
-	let article = placeTypeArticle(place.type_of)
-	let parentText = ''
-	if( place.parent && isNaN(place.parent) ){
-		let preposition = placeTypePreposition(place.parent.type_of)
-		parentText = ` ${preposition} ${place.parent.name} `	
-	}
-	return `${place.name} ( ${article} ${place.type_of} ${parentText})`
+	return `${place.name} ${placeParenthetical(place)}`
 }
 
 export function placeTypeArticle(jurisdictionType){
@@ -14,4 +8,14 @@ export function placeTypeArticle(jurisdictionType){
 
 export function placeTypePreposition(jurisdictionType){
 	return /island|world/i.test(jurisdictionType) ? 'on' : 'in'
+}
+
+export function placeParenthetical(place){
+	let article = placeTypeArticle(place.type_of)
+	let parentText = ''
+	if( place.parent && isNaN(place.parent) ){
+		let preposition = placeTypePreposition(place.parent.type_of)
+		parentText = ` ${preposition} ${place.parent.name} `	
+	}
+	return `( ${article} ${place.type_of} ${parentText})`
 }

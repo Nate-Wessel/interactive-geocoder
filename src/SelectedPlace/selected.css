@@ -18,3 +18,11 @@
 	border-radius: 10px;
 	margin: 10px;
 }
+
+#geo_id {
+	font-size: 2em;
+}
+#geo_id::before {
+	content: '# ';
+	color: #bbb;
+}
