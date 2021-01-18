@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useParams, NavLink } from 'react-router-dom'
 import { json } from 'd3-fetch'
 import AddChildForm from '../AddChildForm.jsx'
+import { placeTypeArticle } from '../placeDisplayName'
 import { publicAPI } from '../API.js'
 import './selected.css'
 
@@ -18,11 +19,11 @@ export default function SelectedPlace(props) {
 	return (
 		<div id="selected-place">
 			<h1>{place.name}</h1>
+			<p>( {placeTypeArticle(place.type_of)} {place.type_of} )</p>
 			<nav>
 				<NavLink to={`/${geo_id}/relations`}>Show Relations</NavLink>
 				<NavLink to={`/${geo_id}/addChild`}>Add Child</NavLink>
 			</nav>
-			<div><b>Type:</b> {place.type_of}</div>
 			<div><b>geo_id:</b> {place.geo_id}</div>
 			<div><b>OSM_id:</b> {place.osm_id}</div>
 			<h3>Outside links</h3>

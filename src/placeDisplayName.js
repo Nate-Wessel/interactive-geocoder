@@ -1,7 +1,17 @@
-
 export function displayName(place){
-	let article = /^[aeiouh]/.test(place.type_of) ? 'an' : 'a'
-	// TODO set preposition properly
-	let preposition_parent = place.parent ? `in ${place.parent.name} ` : ''
-	return `${place.name} ( ${article} ${place.type_of} ${preposition_parent})`
+	let article = placeTypeArticle(place.type_of)
+	let parentText = ''
+	if( place.parent && isNaN(place.parent) ){
+		let preposition = placeTypePreposition(place.parent.type_of)
+		parentText = ` ${preposition} ${place.parent.name} `	
+	}
+	return `${place.name} ( ${article} ${place.type_of} ${parentText})`
+}
+
+export function placeTypeArticle(jurisdictionType){
+	return /island|autonomous*/i.test(jurisdictionType) ? 'an' : 'a'
+}
+
+export function placeTypePreposition(jurisdictionType){
+	return /island|world/i.test(jurisdictionType) ? 'on' : 'in'
 }
